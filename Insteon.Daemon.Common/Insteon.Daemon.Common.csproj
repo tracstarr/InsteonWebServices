@@ -59,15 +59,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Request\DimmableLightingRequest.cs" />
     <Compile Include="Request\GetDevices.cs" />
     <Compile Include="Request\GetStatus.cs" />
+    <Compile Include="Request\InsteonDeviceRequest.cs" />
     <Compile Include="Response\GetDevicesResponse.cs" />
     <Compile Include="InsteonAppListenerHost.cs" />
     <Compile Include="InsteonManager.cs" />
     <Compile Include="Service\InsteonService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Request\SwitchRequest.cs" />
+    <Compile Include="Request\SwitchedLightingRequest.cs" />
     <Compile Include="Request\SmartThingsSettingsRequest.cs" />
+    <Compile Include="Service\LightingService.cs" />
     <Compile Include="SmartThingsSettings.cs" />
     <Compile Include="TaskExtension.cs" />
   </ItemGroup>

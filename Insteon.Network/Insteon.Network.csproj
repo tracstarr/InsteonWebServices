@@ -38,39 +38,59 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConnectProgressChangedEventHandler.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="EchoStatus.cs" />
-    <Compile Include="InsteonAddress.cs" />
+    <Compile Include="Commands\ExtendedCommands.cs" />
+    <Compile Include="Commands\GroupCommands.cs" />
+    <Compile Include="Commands\BroadcastCommands.cs" />
+    <Compile Include="Commands\InsteonModemConfigurationFlags.cs" />
+    <Compile Include="Commands\InsteonModemSerialCommandSend.cs" />
+    <Compile Include="Devices\SwitchedLighting.cs" />
+    <Compile Include="Enum\InsteonDeviceLinkRecordType.cs" />
+    <Compile Include="Enum\DeviceLevelEnum.cs" />
+    <Compile Include="Enum\DimmerDirection.cs" />
+    <Compile Include="Commands\InsteonModemSerialCommandReceived.cs" />
+    <Compile Include="Enum\MessageFlagsStandard.cs" />
+    <Compile Include="Enum\MessageTypeFlags.cs" />
+    <Compile Include="Message\IMessageProcessor.cs" />
+    <Compile Include="Message\ConnectProgressChangedEventHandler.cs" />
+    <Compile Include="Helpers\Constants.cs" />
+    <Compile Include="Devices\DimmableLighting.cs" />
+    <Compile Include="Device\InsteonDeviceFactory.cs" />
+    <Compile Include="Enum\EchoStatus.cs" />
+    <Compile Include="Device\InsteonAddress.cs" />
     <Compile Include="InsteonConnection.cs" />
-    <Compile Include="InsteonConnectionType.cs" />
-    <Compile Include="InsteonControllerGroupCommands.cs" />
-    <Compile Include="InsteonDeviceStatusChangedEventArgs.cs" />
-    <Compile Include="InsteonDeviceCommands.cs" />
-    <Compile Include="InsteonDeviceEventArgs.cs" />
-    <Compile Include="InsteonDeviceLinkRecord.cs" />
-    <Compile Include="InsteonDeviceStatus.cs" />
-    <Compile Include="InsteonIdentity.cs" />
-    <Compile Include="InsteonLinkMode.cs" />
-    <Compile Include="InsteonMessage.cs" />
-    <Compile Include="InsteonMessageType.cs" />
-    <Compile Include="Log.cs" />
-    <Compile Include="InsteonMessageProcessor.cs" />
-    <Compile Include="InsteonMessenger.cs" />
+    <Compile Include="Enum\InsteonConnectionType.cs" />
+    <Compile Include="Commands\InsteonControllerGroupCommands.cs" />
+    <Compile Include="Helpers\InsteonCategoryExtensions.cs" />
+    <Compile Include="Device\InsteonDeviceStatusChangedEventArgs.cs" />
+    <Compile Include="Commands\InsteonDirectCommands.cs" />
+    <Compile Include="Device\InsteonDeviceEventArgs.cs" />
+    <Compile Include="Device\InsteonDeviceLinkRecord.cs" />
+    <Compile Include="Device\InsteonDeviceStatus.cs" />
+    <Compile Include="Device\InsteonIdentity.cs" />
+    <Compile Include="Enum\InsteonLinkMode.cs" />
+    <Compile Include="Message\InsteonMessage.cs" />
+    <Compile Include="Enum\InsteonMessageType.cs" />
+    <Compile Include="Helpers\Log.cs" />
+    <Compile Include="Message\InsteonMessageProcessor.cs" />
+    <Compile Include="Message\InsteonMessenger.cs" />
     <Compile Include="InsteonController.cs" />
     <Compile Include="InsteonNetworkBridge.cs" />
-    <Compile Include="InsteonDevice.cs" />
-    <Compile Include="InsteonDeviceList.cs" />
+    <Compile Include="Device\InsteonDevice.cs" />
+    <Compile Include="Device\InsteonDeviceList.cs" />
     <Compile Include="Serial\ISerialPort.cs" />
     <Compile Include="InsteonNetwork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyKey.cs" />
+    <Compile Include="Enum\PropertyKey.cs" />
     <Compile Include="Serial\SerialPortCreator.cs" />
     <Compile Include="Serial\SerialPortDriver.cs" />
-    <Compile Include="SmartLincFinder.cs" />
+    <Compile Include="Helpers\SmartLincFinder.cs" />
     <Compile Include="Serial\NetDriver.cs" />
-    <Compile Include="Utilities.cs" />
+    <Compile Include="Helpers\Utilities.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Readme.md" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

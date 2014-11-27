@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using Insteon.Daemon.Common.Request;
 using Insteon.Daemon.Common.Response;
-using Insteon.Network;
+using Insteon.Network.Device;
 using ServiceStack;
 
 namespace Insteon.Daemon.Common.Service
 {
+
     public class InsteonService : ServiceStack.Service
     {
         private readonly InsteonManager manager;
@@ -42,27 +43,6 @@ namespace Insteon.Daemon.Common.Service
                 manager.Network.Devices.Count
             };
 
-        }
-
-        public ResponseStatus Any(SwitchRequest request)
-        {
-            InsteonAddress address;
-            if (InsteonAddress.TryParse(request.DeviceId, out address))
-            {
-                var device = manager.Network.Devices.Find(address);
-                if (request.State)
-                    device.Command(InsteonDeviceCommands.On);
-                else if (!request.State)
-                    device.Command(InsteonDeviceCommands.Off);
-            }
-            else
-            {
-                return new ResponseStatus("404");
-            }
-            
-
-            return new ResponseStatus();
-            
         }
 
         public ResponseStatus Any(SmartThingsSettingsRequest request)

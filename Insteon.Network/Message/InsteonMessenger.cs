@@ -1,27 +1,14 @@
-﻿// <copyright company="INSTEON">
-// Copyright (c) 2012 All Right Reserved, http://www.insteon.net
-//
-// This source is subject to the Common Development and Distribution License (CDDL). 
-// Please see the LICENSE.txt file for more information.
-// All other rights reserved.
-//
-// THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY 
-// KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// </copyright>
-// <author>Dave Templin</author>
-// <email>info@insteon.net</email>
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading;
+using Insteon.Network.Commands;
+using Insteon.Network.Device;
+using Insteon.Network.Enum;
+using Insteon.Network.Helpers;
 
-namespace Insteon.Network
+namespace Insteon.Network.Message
 {
     // This class is responsible for processing raw messages into structured property lists and dispatching the result to individual device objects.
     // The responsibilities of the messenger include:
@@ -30,28 +17,33 @@ namespace Insteon.Network
     //  - Processing raw message bytes into structured property lists.
     //  - Determining the logical device object to which the message is directed and dispatching the message to that object.
     //  - Reporting back to the bridge whether or not each message is valid, and if valid the size in bytes of the message.
-    internal class InsteonMessenger : InsteonNetworkBridge.IMessageProcessor
+    internal class InsteonMessenger : IMessageProcessor
     {
-        private readonly InsteonNetwork network;
         private readonly InsteonNetworkBridge bridge;
-        private readonly List<WaitItem> waitList = new List<WaitItem>();
         private readonly Dictionary<string, Timer> duplicates = new Dictionary<string, Timer>(); // used to detect duplicate messages
-        private byte[] sentMessage = null; // bytes of last sent message, used to match the echo
-        private bool echoCommand = false;
-        private InsteonMessage echoMessage = null;
-
-        public Dictionary<PropertyKey, int> ControllerProperties { get; private set; }
-
-        public bool IsConnected { get { return bridge.IsConnected; } }
+        private readonly InsteonNetwork network;
+        private readonly List<WaitItem> waitList = new List<WaitItem>();
+        private bool echoCommand;
+        private InsteonMessage echoMessage;
+        private byte[] sentMessage; // bytes of last sent message, used to match the echo
 
         public InsteonMessenger(InsteonNetwork network)
         {
             if (network == null)
+            {
                 throw new ArgumentNullException("network");
+            }
 
             this.network = network;
             bridge = new InsteonNetworkBridge(this);
             ControllerProperties = new Dictionary<PropertyKey, int>();
+        }
+
+        public Dictionary<PropertyKey, int> ControllerProperties { get; private set; }
+
+        public bool IsConnected
+        {
+            get { return bridge.IsConnected; }
         }
 
         public void Close()
@@ -71,7 +63,8 @@ namespace Insteon.Network
             }
             Log.WriteLine("Connected to '{0}'", connection);
 
-            byte[] message = { 0x6B, 0x48 }; // disable deadman
+            // disable deadman 0x48 ? TODO: according to spec this should be 00010000 0x10?
+            byte[] message = { (byte)InsteonModemSerialCommandSend.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
             Send(message);
         }
 
@@ -80,7 +73,9 @@ namespace Insteon.Network
             string key = state as string;
             lock (duplicates)
                 if (duplicates.ContainsKey(key))
+                {
                     duplicates.Remove(key);
+                }
         }
 
         private bool IsDuplicateMessage(InsteonMessage message)
@@ -88,9 +83,13 @@ namespace Insteon.Network
             lock (duplicates)
             {
                 // determine if message key matches an entry in the list
-                foreach (KeyValuePair<string, Timer> item in duplicates)
+                foreach (var item in duplicates)
+                {
                     if (message.Key == item.Key)
+                    {
                         return true;
+                    }
+                }
 
                 // create a new duplicte entry
                 Timer timer = new Timer(DuplicateMessageTimerCallback, message.Key, 0, 1000);
@@ -123,7 +122,7 @@ namespace Insteon.Network
                 }
                 else
                 {
-                    Log.WriteLine("WARNING: Unknown device {0} received message {1}", InsteonAddress.Format(address), message.ToString());
+                    Log.WriteLine("WARNING: Unknown device {0} received message {1}. Could be Identification process.", InsteonAddress.Format(address), message.ToString());
                 }
             }
             else
@@ -136,13 +135,17 @@ namespace Insteon.Network
         public void Send(byte[] message)
         {
             if (TrySend(message, true) != EchoStatus.ACK)
+            {
                 throw new IOException(string.Format("Failed to send message '{0}'", Utilities.ByteArrayToString(message)));
+            }
         }
 
         public void SendReceive(byte[] message, byte receiveMessageId, out Dictionary<PropertyKey, int> properties)
         {
-            if (TrySendReceive(message, true, receiveMessageId, out properties) != EchoStatus.ACK)
+            if (TrySendReceive(message, true, receiveMessageId, null, out properties) != EchoStatus.ACK)
+            {
                 throw new IOException(string.Format("Failed to send message '{0}'.", Utilities.ByteArrayToString(message)));
+            }
         }
 
         public bool TryConnect(InsteonConnection connection)
@@ -159,7 +162,8 @@ namespace Insteon.Network
                     }
                     Log.WriteLine("Connected to '{0}'", connection);
 
-                    byte[] message = { 0x6B, 0x48 }; // disable deadman
+                    // disable deadman 0x48 ? TODO: according to spec this should be 00010000 0x10?
+                    byte[] message = { (byte)InsteonModemSerialCommandSend.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
                     TrySend(message);
 
                     return true;
@@ -172,12 +176,7 @@ namespace Insteon.Network
             return false;
         }
 
-        public EchoStatus TrySend(byte[] message)
-        {
-            return TrySend(message, true);
-        }
-
-        public EchoStatus TrySend(byte[] message, bool retryOnNak)
+        public EchoStatus TrySend(byte[] message, bool retryOnNak = true)
         {
             return TrySend(message, retryOnNak, message.Length);
         }
@@ -205,7 +204,9 @@ namespace Insteon.Network
                 {
                     Log.WriteLine("ERROR: Unexpected failure... {0}", ex.Message);
                     if (Debugger.IsAttached)
+                    {
                         throw;
+                    }
                 }
                 finally
                 {
@@ -235,11 +236,11 @@ namespace Insteon.Network
             return status;
         }
 
-        public EchoStatus TrySendReceive(byte[] message, bool retryOnNak, byte receiveMessageId, out Dictionary<PropertyKey, int> properties)
+        public EchoStatus TrySendReceive(byte[] message, bool retryOnNak, byte receiveMessageId, InsteonMessageType? receiveMessageType, out Dictionary<PropertyKey, int> properties)
         {
             properties = null;
-            WaitItem item = new WaitItem(receiveMessageId);
-            
+            WaitItem item = new WaitItem(receiveMessageId, receiveMessageType);
+
             lock (waitList)
                 waitList.Add(item);
 
@@ -247,11 +248,17 @@ namespace Insteon.Network
             if (status == EchoStatus.ACK)
             {
                 if (item.Message == null)
+                {
                     item.MessageEvent.WaitOne(Constants.sendReceiveTimeout);
+                }
                 if (item.Message != null)
+                {
                     properties = item.Message.Properties;
+                }
                 else
+                {
                     Log.WriteLine("ERROR: Did not receive expected message reply; SentMessage='{0}', ExpectedReceiveMessageId={1:X2}, Timeout={2}ms", Utilities.ByteArrayToString(message), receiveMessageId, Constants.sendReceiveTimeout);
+                }
             }
 
             lock (waitList)
@@ -267,12 +274,18 @@ namespace Insteon.Network
                 for (int i = 0; i < waitList.Count; ++i)
                 {
                     WaitItem item = waitList[i];
+
                     if (message.MessageId == item.MessageId)
-                        if (item.Message == null)
+                    {
+                        if (item.MessageType == null || item.MessageType.Value == message.MessageType)
                         {
-                            item.Message = message;
-                            item.MessageEvent.Set();
+                            if (item.Message == null)
+                            {
+                                item.Message = message;
+                                item.MessageEvent.Set();
+                            }
                         }
+                    }
                 }
             }
         }
@@ -280,22 +293,24 @@ namespace Insteon.Network
         public bool VerifyConnection()
         {
             if (!bridge.IsConnected)
+            {
                 return false;
+            }
 
-            byte[] message = { 0x60 };
+            byte[] message = { (byte)InsteonModemSerialCommandSend.GetImInfo };
             Dictionary<PropertyKey, int> properties;
             EchoStatus status = TrySendEchoCommand(message, true, 7, out properties);
             if (status == EchoStatus.ACK || status == EchoStatus.NAK)
+            {
                 return true;
+            }
 
             Log.WriteLine("ERROR: Verify connection failed");
             network.OnDisconnected();
             return false;
         }
 
-        #region InsteonNetworkBridge.IMessageProcessor
-
-        bool InsteonNetworkBridge.IMessageProcessor.ProcessMessage(byte[] data, int offset, out int count)
+        bool IMessageProcessor.ProcessMessage(byte[] data, int offset, out int count)
         {
             InsteonMessage message;
             if (InsteonMessageProcessor.ProcessMessage(data, offset, out count, out message))
@@ -312,15 +327,12 @@ namespace Insteon.Network
                 }
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
-        bool InsteonNetworkBridge.IMessageProcessor.ProcessEcho(byte[] data, int offset, out int count)
+        bool IMessageProcessor.ProcessEcho(byte[] data, int offset, out int count)
         {
-            byte[] message = Utilities.ArraySubset(data, offset, sentMessage.Length);
+            var message = Utilities.ArraySubset(data, offset, sentMessage.Length);
             if (echoCommand)
             {
                 if (InsteonMessageProcessor.ProcessMessage(data, offset, out count, out echoMessage))
@@ -328,39 +340,32 @@ namespace Insteon.Network
                     Log.WriteLine("PROCESSOR: Echo '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), echoMessage.ToString("Log"));
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
-            else if (Utilities.ArraySequenceEquals(sentMessage, message))
+            if (Utilities.ArraySequenceEquals(sentMessage, message))
             {
                 count = sentMessage.Length;
                 Log.WriteLine("PROCESSOR: Echo '{0}' matched", Utilities.ByteArrayToString(data, offset, count));
                 return true;
             }
-            else
-            {
-                count = 0;
-                return false;
-            }
+            count = 0;
+            return false;
         }
 
-        void InsteonNetworkBridge.IMessageProcessor.SetEchoStatus(EchoStatus status)
-        {
-        }
-
-        #endregion
+        void IMessageProcessor.SetEchoStatus(EchoStatus status) { }
 
         private class WaitItem
         {
-            public WaitItem(byte messageId)
+            public WaitItem(byte messageId, InsteonMessageType? messageType)
             {
-                this.MessageId = messageId;
-                this.MessageEvent = new AutoResetEvent(false);
-                this.Message = null;
+                MessageId = messageId;
+                MessageType = messageType;
+                MessageEvent = new AutoResetEvent(false);
+                Message = null;
             }
+
             public byte MessageId { get; private set; }
+            public InsteonMessageType? MessageType { get; private set; }
             public AutoResetEvent MessageEvent { get; private set; }
             public InsteonMessage Message { get; set; }
         }

@@ -1,25 +1,7 @@
-﻿// <copyright company="INSTEON">
-// Copyright (c) 2012 All Right Reserved, http://www.insteon.net
-//
-// This source is subject to the Common Development and Distribution License (CDDL). 
-// Please see the LICENSE.txt file for more information.
-// All other rights reserved.
-//
-// THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY 
-// KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// </copyright>
-// <author>Dave Templin</author>
-// <email>info@insteon.net</email>
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
-using System.Text;
 
-namespace Insteon.Network
+namespace Insteon.Network.Device
 {
     /// <summary>
     /// Represents an INSTEON device address. Example: 19.9E.4E.
@@ -54,17 +36,37 @@ namespace Insteon.Network
         /// <param name="index">Specifies the byte part to be returned. Valid indexes are 0, 1, and 2.</param>
         /// <returns>A byte part of the INSTEON address.</returns>
         public byte this[int index]
-        { 
-            get 
+        {
+            get
             {
                 switch (index)
                 {
-                    case 0: return (byte)((value & 0x0000FF) >> 0);
-                    case 1: return (byte)((value & 0x00FF00) >> 8);
-                    case 2: return (byte)((value & 0xFF0000) >> 16);
-                    default: throw new ArgumentOutOfRangeException();
+                    case 0:
+                        return (byte) ((value & 0x0000FF) >> 0);
+                    case 1:
+                        return (byte) ((value & 0x00FF00) >> 8);
+                    case 2:
+                        return (byte) ((value & 0xFF0000) >> 16);
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this InsteonAddress is empty.
+        /// </summary>
+        public bool IsEmpty
+        {
+            get { return value == 0; }
+        }
+
+        /// <summary>
+        /// Returns the integer representation of the INSTEON address.
+        /// </summary>
+        public int Value
+        {
+            get { return value; }
         }
 
         /// <summary>
@@ -78,11 +80,6 @@ namespace Insteon.Network
         }
 
         /// <summary>
-        /// Gets a value indicating whether this InsteonAddress is empty.
-        /// </summary>
-        public bool IsEmpty { get { return value == 0; } }
-
-        /// <summary>
         /// Converts the string representation of an INSTEON address to its numeric equivalent.
         /// </summary>
         /// <param name="value">A string specifying the INSTEON address, example: "19.9E.4A".</param>
@@ -91,7 +88,9 @@ namespace Insteon.Network
         {
             InsteonAddress address;
             if (!TryParse(value, out address))
+            {
                 throw new FormatException();
+            }
             return address;
         }
 
@@ -108,12 +107,18 @@ namespace Insteon.Network
         {
             address = new InsteonAddress();
             if (string.IsNullOrEmpty(value))
+            {
                 return false;
+            }
             value = value.Trim();
             if (value.Length != 8)
+            {
                 return false;
+            }
             if (value[2] != '.' || value[5] != '.')
+            {
                 return false;
+            }
             byte a0 = byte.Parse(value.Substring(6, 2), NumberStyles.HexNumber);
             byte a1 = byte.Parse(value.Substring(3, 2), NumberStyles.HexNumber);
             byte a2 = byte.Parse(value.Substring(0, 2), NumberStyles.HexNumber);
@@ -125,17 +130,11 @@ namespace Insteon.Network
         /// Converts the numeric value of this instance to its equivalent string representation.
         /// </summary>
         public override string ToString()
-        {            
+        {
             int a0 = (value & 0x0000FF) >> 0;
             int a1 = (value & 0x00FF00) >> 8;
             int a2 = (value & 0xFF0000) >> 16;
             return string.Format("{0:X2}.{1:X2}.{2:X2}", a2, a1, a0);
         }
-
-        /// <summary>
-        /// Returns the integer representation of the INSTEON address.
-        /// </summary>
-        public int Value { get { return value; } }
     }
-
 }

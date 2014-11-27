@@ -1,24 +1,9 @@
-﻿// <copyright company="INSTEON">
-// Copyright (c) 2012 All Right Reserved, http://www.insteon.net
-//
-// This source is subject to the Common Development and Distribution License (CDDL). 
-// Please see the LICENSE.txt file for more information.
-// All other rights reserved.
-//
-// THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY 
-// KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// </copyright>
-// <author>Dave Templin</author>
-// <email>info@insteon.net</email>
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Insteon.Network.Enum;
 
-namespace Insteon.Network
+namespace Insteon.Network.Helpers
 {
     internal static class Utilities
     {
@@ -30,8 +15,10 @@ namespace Insteon.Network
         public static byte[] ArraySubset(byte[] data, int offset, int count)
         {
             if (count > data.Length - offset)
+            {
                 count = data.Length - offset;
-            byte[] result = new byte[count];
+            }
+            var result = new byte[count];
             Array.Copy(data, offset, result, 0, count);
             return result;
         }
@@ -39,9 +26,15 @@ namespace Insteon.Network
         public static bool ArraySequenceEquals(byte[] a, byte[] b)
         {
             if (a != null && b != null && a.Length == b.Length)
+            {
                 for (int i = 0; i < a.Length; ++i)
+                {
                     if (a[i] != b[i])
+                    {
                         return false;
+                    }
+                }
+            }
             return true;
         }
 
@@ -59,28 +52,37 @@ namespace Insteon.Network
         {
             StringBuilder sb = new StringBuilder();
             for (int i = offset; i < offset + count; ++i)
+            {
                 if (i < data.Length)
+                {
                     sb.AppendFormat("{1}{0:X2}", data[i], i == offset ? "" : " ");
+                }
+            }
             return sb.ToString();
         }
 
         public static string FormatHex(int value)
         {
             if (value <= 0xFF)
+            {
                 return string.Format("{0:X2}", value);
-            else if (value <= 0xFFFF)
+            }
+            if (value <= 0xFFFF)
+            {
                 return string.Format("{0:X4}", value);
-            else if (value <= 0xFFFFFF)
+            }
+            if (value <= 0xFFFFFF)
+            {
                 return string.Format("{0:X6}", value);
-            else
-                return string.Format("{0:X8}", value);
+            }
+            return string.Format("{0:X8}", value);
         }
 
         public static string FormatProperties(Dictionary<PropertyKey, int> properties, bool multiline, bool filterMessageFlags)
         {
             bool first = true;
             StringBuilder sb = new StringBuilder();
-            foreach (KeyValuePair<PropertyKey, int> item in properties)
+            foreach (var item in properties)
             {
                 if (!filterMessageFlags || (item.Key != PropertyKey.MessageFlagsRemainingHops && item.Key != PropertyKey.MessageFlagsMaxHops))
                 {
@@ -92,11 +94,13 @@ namespace Insteon.Network
                     else
                     {
                         if (!first)
+                        {
                             sb.Append(" ");
+                        }
                     }
-                    sb.AppendFormat("{0}={1}", item.Key, Utilities.FormatHex(item.Value));
+                    sb.AppendFormat("{0}={1}", item.Key, FormatHex(item.Value));
                     first = false;
-                }                
+                }
             }
             return sb.ToString();
         }

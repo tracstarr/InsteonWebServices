@@ -1,31 +1,45 @@
-﻿// <copyright company="INSTEON">
-// Copyright (c) 2012 All Right Reserved, http://www.insteon.net
-//
-// This source is subject to the Common Development and Distribution License (CDDL). 
-// Please see the LICENSE.txt file for more information.
-// All other rights reserved.
-//
-// THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY 
-// KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// </copyright>
-// <author>Dave Templin</author>
-// <email>info@insteon.net</email>
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading;
 
-namespace Insteon.Network
+namespace Insteon.Network.Device
 {
     /// <summary>
     /// Represents the collection of known INSTEON devices within the INSTEON network.
     /// </summary>
     public class InsteonDeviceList : IEnumerable<InsteonDevice>
     {
+        private readonly Dictionary<int, InsteonDevice> devices = new Dictionary<int, InsteonDevice>();
+        private readonly InsteonNetwork network;
+
+        internal InsteonDeviceList(InsteonNetwork network)
+        {
+            this.network = network;
+        }
+
+        /// <summary>
+        /// Returns the number of devices in the known INSTEON device collection.
+        /// </summary>
+        public int Count
+        {
+            get { return devices.Count; }
+        }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>An IEnumerator object that can be used to iterate through the collection.</returns>
+        public IEnumerator GetEnumerator()
+        {
+            return devices.Values.GetEnumerator();
+        }
+
+        IEnumerator<InsteonDevice> IEnumerable<InsteonDevice>.GetEnumerator()
+        {
+            return devices.Values.GetEnumerator();
+        }
+
         /// <summary>
         /// Invoked whenever a device is added to the network.
         /// </summary>
@@ -40,19 +54,11 @@ namespace Insteon.Network
         /// Invoked when a device is identified.
         /// </summary>
         public event InsteonDeviceEventHandler DeviceIdentified;
-        
+
         /// <summary>
         /// Invoked when a status message is received from any known INSTEON device in the network, for example when a device turns on or off.
         /// </summary>
         public event InsteonDeviceStatusChangedEventHandler DeviceStatusChanged;
-
-        private readonly InsteonNetwork network;
-        private readonly Dictionary<int, InsteonDevice> devices = new Dictionary<int,InsteonDevice>();
-
-        internal InsteonDeviceList(InsteonNetwork network)
-        {
-            this.network = network;
-        }
 
         /// <summary>
         /// Adds an INSTEON device to the list of known devices.
@@ -63,10 +69,17 @@ namespace Insteon.Network
         /// <remarks>This method does not perform any INSTEON messaging, it only adds the specified device to a list of known devices.</remarks>
         public InsteonDevice Add(InsteonAddress address, InsteonIdentity identity)
         {
-            if (devices.ContainsKey(address.Value))
-                return devices[address.Value];
+            if (identity.IsEmpty)
+            {
+                throw new Exception("Identity is empty.");    
+            }
 
-            InsteonDevice device = new InsteonDevice(network, address, identity);
+            if (devices.ContainsKey(address.Value))
+            {
+                return devices[address.Value];
+            }
+
+            InsteonDevice device = identity.GetDevice(network, address); 
             devices.Add(address.Value, device);
             OnDeviceAdded(device);
             return device;
@@ -93,14 +106,6 @@ namespace Insteon.Network
         }
 
         /// <summary>
-        /// Returns the number of devices in the known INSTEON device collection.
-        /// </summary>
-        public int Count
-        {
-            get { return devices.Count; }
-        }
-
-        /// <summary>
         /// Finds the object representation of the specified device within the list of known devices.
         /// </summary>
         /// <param name="address">The specified INSTEON address.</param>
@@ -120,39 +125,36 @@ namespace Insteon.Network
             return devices[address.Value];
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
-        /// <returns>An IEnumerator object that can be used to iterate through the collection.</returns>
-        public IEnumerator GetEnumerator()
-        {
-            return devices.Values.GetEnumerator();
-        }
-
-        IEnumerator<InsteonDevice> IEnumerable<InsteonDevice>.GetEnumerator()
-        {
-            return devices.Values.GetEnumerator();
-        }
-
         internal void OnDeviceAdded(InsteonDevice device)
         {
             if (DeviceAdded != null)
+            {
                 DeviceAdded(this, new InsteonDeviceEventArgs(device));
+            }
         }
+
         internal void OnDeviceCommandTimeout(InsteonDevice device)
         {
             if (DeviceCommandTimeout != null)
+            {
                 DeviceCommandTimeout(this, new InsteonDeviceEventArgs(device));
+            }
         }
+
         internal void OnDeviceIdentified(InsteonDevice device)
         {
             if (DeviceIdentified != null)
+            {
                 DeviceIdentified(this, new InsteonDeviceEventArgs(device));
+            }
         }
+
         internal void OnDeviceStatusChanged(InsteonDevice device, InsteonDeviceStatus status)
         {
             if (DeviceStatusChanged != null)
+            {
                 DeviceStatusChanged(this, new InsteonDeviceStatusChangedEventArgs(device, status));
+            }
         }
     }
 }

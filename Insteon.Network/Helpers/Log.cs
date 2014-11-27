@@ -1,39 +1,23 @@
-﻿// <copyright company="INSTEON">
-// Copyright (c) 2012 All Right Reserved, http://www.insteon.net
-//
-// This source is subject to the Common Development and Distribution License (CDDL). 
-// Please see the LICENSE.txt file for more information.
-// All other rights reserved.
-//
-// THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY 
-// KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// </copyright>
-// <author>Dave Templin</author>
-// <email>info@insteon.net</email>
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text;
 
-namespace Insteon.Network
+namespace Insteon.Network.Helpers
 {
     internal static class Log
     {
         private static readonly object sync = new object();
-        private static StreamWriter w = null;
+        private static StreamWriter w;
 
         public static void Open(string path)
         {
             lock (sync)
             {
                 if (w != null)
+                {
                     w.Close();
+                }
 
                 string fullPath = null;
                 for (int i = 0; i < 10000; ++i)
@@ -42,12 +26,16 @@ namespace Insteon.Network
                     fullPath = Path.Combine(path, fileName);
 
                     if (!File.Exists(fullPath))
+                    {
                         break;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(fullPath))
+                {
                     w = new StreamWriter(fullPath);
-                
+                }
+
                 if (w != null)
                 {
                     FileVersionInfo version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
@@ -81,7 +69,9 @@ namespace Insteon.Network
         {
             lock (sync)
                 if (w != null)
+                {
                     w.Close();
+                }
         }
     }
 }

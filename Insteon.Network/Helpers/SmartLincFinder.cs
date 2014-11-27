@@ -1,34 +1,18 @@
-﻿// <copyright company="INSTEON">
-// Copyright (c) 2012 All Right Reserved, http://www.insteon.net
-//
-// This source is subject to the Common Development and Distribution License (CDDL). 
-// Please see the LICENSE.txt file for more information.
-// All other rights reserved.
-//
-// THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY 
-// KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// </copyright>
-// <author>Dave Templin</author>
-// <email>info@insteon.net</email>
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
+using Insteon.Network.Device;
 
-namespace Insteon.Network
+namespace Insteon.Network.Helpers
 {
     // This class is responsible communicating with the Smarthome web service to obtain the list of registered devices on the local network.
     internal static class SmartLincFinder
     {
         public static SmartLincInfo[] GetRegisteredSmartLincs()
         {
-            List<SmartLincInfo> list = new List<SmartLincInfo>();
+            var list = new List<SmartLincInfo>();
 
             string html = GetHtml("http://smartlinc.smarthome.com/getinfo.asp");
             if (!string.IsNullOrEmpty(html))
@@ -47,17 +31,13 @@ namespace Insteon.Network
                         {
                             list.Add(new SmartLincInfo(url, address));
                         }
-                        catch (FormatException)
-                        {
-                        }
-                        catch (ArgumentException)
-                        {
-                        }
+                        catch (FormatException) {}
+                        catch (ArgumentException) {}
                     }
                     m1 = m1.NextMatch();
                 }
             }
-                        
+
             return list.ToArray();
         }
 
@@ -69,7 +49,9 @@ namespace Insteon.Network
                 Regex namePattern = new Regex(@"HA\[0\]\s*=\s*""(?<name>[^""]+)""");
                 Match m = namePattern.Match(html);
                 if (m.Success)
+                {
                     return m.Groups["name"].ToString();
+                }
             }
             return string.Empty;
         }
@@ -89,18 +71,10 @@ namespace Insteon.Network
                 }
                 return html;
             }
-            catch (WebException)
-            {
-            }
-            catch (IOException)
-            {
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (FormatException)
-            {
-            }            
+            catch (WebException) {}
+            catch (IOException) {}
+            catch (ArgumentException) {}
+            catch (FormatException) {}
             return null;
         }
     }
@@ -109,9 +83,10 @@ namespace Insteon.Network
     {
         internal SmartLincInfo(string url, string address)
         {
-            this.Uri = new Uri(url);
-            this.InsteonAddress = InsteonAddress.Parse(address);
+            Uri = new Uri(url);
+            InsteonAddress = InsteonAddress.Parse(address);
         }
+
         public InsteonAddress InsteonAddress { get; private set; }
         public Uri Uri { get; private set; }
     }

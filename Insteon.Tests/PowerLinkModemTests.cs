@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Insteon.Network;
+using Insteon.Network.Device;
+using Insteon.Network.Enum;
 using NUnit.Framework;
 
 namespace Insteon.Tests

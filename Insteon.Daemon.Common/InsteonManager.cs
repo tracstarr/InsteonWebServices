@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using Insteon.Network;
+using Insteon.Network.Device;
 using ServiceStack.Logging;
 
 namespace Insteon.Daemon.Common
@@ -10,7 +9,7 @@ namespace Insteon.Daemon.Common
     {
         private readonly ILog logger = LogManager.GetLogger(typeof(InsteonManager));
         private readonly Uri smartAppUri;
-        private readonly ManualResetEvent signalEvent = new ManualResetEvent(false);
+        
         public InsteonConnection Connection { get; private set; }
         public InsteonNetwork Network { get; private set; }
         public InsteonManager(string insteonSource, Uri smartAppUri)
@@ -37,7 +36,6 @@ namespace Insteon.Daemon.Common
             {
                 Network.Devices.DeviceStatusChanged += OnDeviceStatusChanged;
                 Network.Devices.DeviceCommandTimeout += OnDeviceCommandTimeout;
-                Network.Devices.DeviceIdentified += (s, e) => signalEvent.Set();
                 RefreshDeviceDatabase();
             }
             return connected;
@@ -51,7 +49,7 @@ namespace Insteon.Daemon.Common
         private void OnDeviceStatusChanged(object sender, InsteonDeviceStatusChangedEventArgs data)
         {
            
-            logger.Debug("device status changed " + data.Device.Address.ToString());
+            logger.Debug("device status changed " + data.Device.ToString());
         }
 
         private void RefreshDeviceDatabase()
@@ -60,23 +58,16 @@ namespace Insteon.Daemon.Common
 
             foreach (var insteonDeviceLinkRecord in links)
             {
-                var d = Network.Devices.Add(insteonDeviceLinkRecord.Address, new InsteonIdentity());
-                // note: this blocks on multiple calls until previous returns. perhaps use event to set wait?
-                d.Identify();
-                signalEvent.WaitOne(new TimeSpan(0, 0, 0, 5));
-                signalEvent.Reset();
-                //await TaskExtension.FromEvent<InsteonDeviceEventHandler, InsteonDeviceEventArgs>(
-                //    (complete, cancel, reject)=>
-                //        (sender, data) =>
-                //        {
-
-                //        }, 
-                //    handler => d.DeviceIdentified += this.handlerTest ,
-                //    handler => d.DeviceIdentified -= this.handlerTest, 
-                //    (complete, cancel, reject)=> d.Identify(), 
-                //    CancellationToken.None);
-
-
+                InsteonIdentity id;
+                if (Network.Controller.TryGetLinkIdentity(insteonDeviceLinkRecord, out id))
+                {
+                    var d = Network.Devices.Add(insteonDeviceLinkRecord.Address, id);
+                    logger.Debug(string.Format("New device identified and added to device list. ({0})",d));
+                }
+                else
+                {
+                    logger.Error("device didn't respond");
+                }
             }
 
         }
