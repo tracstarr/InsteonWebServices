@@ -19,5 +19,8 @@
         public const int webRequestTimeout = 5000; // timeout for web requests to smartlinc.smarthome.com and for accessing SmartLinc devices over the local network
         public const byte MessageStartByte = 0x02; // todo: is this only for serial commands?
         public const byte MessageEndByte = 0x06;// todo: is this only for serial commands?
+        public const byte ResponderCmd = 0x01;
+        public const byte ControllerCmd = 0x02;
+        public const byte SuccessCmd = 0x06;
     }
 }

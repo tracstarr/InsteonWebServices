@@ -123,8 +123,8 @@ namespace Insteon.Network
             if (message.MessageType == InsteonMessageType.DeviceLink)
             {
                 var address = new InsteonAddress(message.Properties[PropertyKey.Address]);
-                var identity = new InsteonIdentity( (byte)message.Properties[PropertyKey.DevCat], 
-                                                    (byte)message.Properties[PropertyKey.SubCat], 
+                var identity = new InsteonIdentity((byte)message.Properties[PropertyKey.DevCat],
+                                                    (byte)message.Properties[PropertyKey.SubCat],
                                                     (byte)message.Properties[PropertyKey.FirmwareVersion]);
                 var device = network.Devices.Add(address, identity);
                 timer.Stop();
@@ -183,7 +183,7 @@ namespace Insteon.Network
             timer.Stop();
             IsInLinkingMode = false;
             linkingMode = null;
-            byte[] message = { (byte)InsteonModemSerialCommandSend.CancelAllLink };
+            byte[] message = { (byte)InsteonModemSerialCommand.CancelAllLink };
             Log.WriteLine("Controller {0} CancelLinkMode", Address.ToString());
             return network.Messenger.TrySend(message) == EchoStatus.ACK;
         }
@@ -202,7 +202,7 @@ namespace Insteon.Network
         public bool TryEnterLinkMode(InsteonLinkMode mode, byte group)
         {
             linkingMode = mode;
-            byte[] message = { (byte)InsteonModemSerialCommandSend.StartAllLink, (byte)mode, group };
+            byte[] message = { (byte)InsteonModemSerialCommand.StartAllLink, (byte)mode, group };
             Log.WriteLine("Controller {0} EnterLinkMode(mode:{1}, group:{2:X2})", Address.ToString(), mode.ToString(), group);
             if (network.Messenger.TrySend(message) != EchoStatus.ACK)
             {
@@ -249,8 +249,8 @@ namespace Insteon.Network
             EchoStatus status;
 
             Log.WriteLine("Controller {0} GetLinks", Address.ToString());
-            byte[] message1 = { (byte)InsteonModemSerialCommandSend.GetFirstAllLinkRecord };
-            status = network.Messenger.TrySendReceive(message1, false, (byte)InsteonModemSerialCommandReceived.DeviceLinkRecord, null, out properties);
+            byte[] message1 = { (byte)InsteonModemSerialCommand.GetFirstAllLinkRecord };
+            status = network.Messenger.TrySendReceive(message1, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
 
             if (status == EchoStatus.NAK)
             {
@@ -273,8 +273,8 @@ namespace Insteon.Network
             }
 
             Log.WriteLine("Controller {0} GetLinks", Address.ToString());
-            byte[] message2 = { (byte)InsteonModemSerialCommandSend.GetNextDeviceLinkRecord };
-            status = network.Messenger.TrySendReceive(message2, false, (byte)InsteonModemSerialCommandReceived.DeviceLinkRecord, null, out properties);
+            byte[] message2 = { (byte)InsteonModemSerialCommand.GetNextDeviceLinkRecord };
+            status = network.Messenger.TrySendReceive(message2, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
             while (status == EchoStatus.ACK)
             {
                 if (properties == null)
@@ -283,7 +283,7 @@ namespace Insteon.Network
                     return false;
                 }
                 list.Add(new InsteonDeviceLinkRecord(properties));
-                status = network.Messenger.TrySendReceive(message2, false, (byte)InsteonModemSerialCommandReceived.DeviceLinkRecord, null, out properties);
+                status = network.Messenger.TrySendReceive(message2, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
             }
 
             if (status != EchoStatus.NAK)
@@ -296,7 +296,7 @@ namespace Insteon.Network
             return true;
         }
 
-        public bool TryGetLinkIdentity(InsteonDeviceLinkRecord link, out InsteonIdentity identity)
+        public bool TryGetLinkIdentity(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
         {
             if (TryGetLinkIdentityInternal(link, out identity))
             {
@@ -317,44 +317,83 @@ namespace Insteon.Network
             return false;
         }
 
-        private bool TryGetLinkIdentityInternal(InsteonDeviceLinkRecord link, out InsteonIdentity identity)
+        private bool TryGetLinkIdentityInternal(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
+        {
+            return GetProductData(link, out identity) || GetLinkIdentity(link, out identity);
+        }
+
+        private bool GetLinkIdentity(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
         {
             Dictionary<PropertyKey, int> properties;
 
             Log.WriteLine("Controller {0} GetLinkIdentity", Address.ToString());
-            byte[] message = { (byte)InsteonModemSerialCommandSend.StandardOrExtendedMessage, link.Address[2], link.Address[1], link.Address[0], 
+            byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, link.Address[2], link.Address[1], link.Address[0], 
                                  (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, (byte)InsteonDirectCommands.IDRequest, Byte.MinValue };
 
-            var status = network.Messenger.TrySendReceive(message, false, (byte)InsteonModemSerialCommandReceived.StandardMessage, InsteonMessageType.SetButtonPressed, out properties);
+            var status = network.Messenger.TrySendReceive(message, false, (byte)InsteonModemSerialCommand.StandardMessage, InsteonMessageType.SetButtonPressed, out properties);
 
             if (status == EchoStatus.NAK)
             {
-                identity = new InsteonIdentity();
-                return true;
+                Log.WriteLine("ERROR: received NAK trying to get idendity information");
+                identity = null;
+                return false;
             }
             if (status == EchoStatus.ACK)
             {
                 if (properties == null)
                 {
-                    Log.WriteLine("ERROR: Controller {0} null properties object", Address.ToString());
-                    identity = new InsteonIdentity();
+                    Log.WriteLine("ERROR: Device Id {0} has null properties object", Address.ToString());
+                    identity = null;
                     return false;
                 }
                 identity = new InsteonIdentity((byte)properties[PropertyKey.DevCat], (byte)properties[PropertyKey.SubCat], (byte)properties[PropertyKey.FirmwareVersion]);
-            }
-            else
-            {
-                identity = new InsteonIdentity();
-                return false; // echo was not ACK or NAK
+                return true;
+
             }
 
-            return true;
+            Log.WriteLine("ERROR: received unknown status trying to get idendity information");
+            identity = null;
+            return false; // echo was not ACK or NAK
+        }
+
+        private bool GetProductData(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
+        {
+            Dictionary<PropertyKey, int> properties;
+
+            Log.WriteLine("Controller {0} GetLinkProductData", Address.ToString());
+            byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, link.Address[2], link.Address[1], link.Address[0], 
+                                 (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, (byte)InsteonDirectCommands.ProductDataRequest, Byte.MinValue };
+
+            var status = network.Messenger.TrySendReceive(message, false, (byte)InsteonModemSerialCommand.ExtendedMessage, InsteonMessageType.ProductDataResponse, out properties);
+
+            if (status == EchoStatus.NAK)
+            {
+                Log.WriteLine("ERROR: received NAK trying to get ProductData information");
+                identity = null;
+                return false;
+            }
+            if (status == EchoStatus.ACK)
+            {
+                if (properties == null)
+                {
+                    Log.WriteLine("ERROR: Device Id {0} has null properties object", Address.ToString());
+                    identity = null;
+                    return false;
+                }
+                var pk = new InsteonProductKey((byte)properties[PropertyKey.ProductKeyHigh], (byte)properties[PropertyKey.ProductKeyMid], (byte)properties[PropertyKey.ProductKeyLow]);
+                identity = new InsteonIdentity((byte)properties[PropertyKey.DevCat], (byte)properties[PropertyKey.SubCat], (byte)properties[PropertyKey.FirmwareVersion], pk);
+                return true;
+            }
+
+            Log.WriteLine("ERROR: received unknown status trying to get productdata information");
+            identity = null;
+            return false; // echo was not ACK or NAK
         }
 
         private byte[] CreateGroupMessage(InsteonControllerGroupCommands command, byte group, byte value)
         {
             var cmd = (byte)command;
-            byte[] message = { (byte)InsteonModemSerialCommandSend.SendAllLinkCommand, group, cmd, value };
+            byte[] message = { (byte)InsteonModemSerialCommand.SendAllLinkCommand, group, cmd, value };
             Log.WriteLine("Controller {0} GroupCommand(command:{1}, group:{2:X2}, value:{3:X2})", Address.ToString(), command.ToString(), group, value);
             return message;
         }

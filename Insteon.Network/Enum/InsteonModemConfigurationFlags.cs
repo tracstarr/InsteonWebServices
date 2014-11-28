@@ -1,5 +1,8 @@
-namespace Insteon.Network.Commands
+using System;
+
+namespace Insteon.Network.Enum
 {
+    [Flags]
     internal enum InsteonModemConfigurationFlags : byte
     {
         Reserved = 0x0,

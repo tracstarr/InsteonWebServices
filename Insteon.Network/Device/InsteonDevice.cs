@@ -67,7 +67,7 @@ namespace Insteon.Network.Device
         /// </remarks>
         /// <param name="command">Specifies the INSTEON device command to be invoked.</param>
         /// <param name="value">A parameter value required by some commands.</param>
-        public void Command(InsteonDirectCommands command, byte value)
+        internal void Command(InsteonDirectCommands command, byte value)
         {
             if (!TryCommand(command, value))
             {
@@ -97,7 +97,7 @@ namespace Insteon.Network.Device
         private static byte[] GetStandardMessage(InsteonAddress address, byte cmd1, byte cmd2)
         {
             // 0x0F is "Message Flags" - type and hops
-            byte[] message = { (byte)InsteonModemSerialCommandSend.StandardOrExtendedMessage, address[2], address[1], address[0], (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, cmd1, cmd2 };
+            byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, address[2], address[1], address[0], (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, cmd1, cmd2 };
             return message;
         }
 
@@ -296,7 +296,7 @@ namespace Insteon.Network.Device
         /// The <see cref="DeviceStatusChanged">DeviceStatusChanged</see> event will be invoked if the command is successful.
         /// The <see cref="DeviceCommandTimeout">DeviceCommandTimeout</see> event will be invoked if the device does not respond within the expected timeout period.
         /// </remarks>
-        public bool TryCommand(InsteonDirectCommands command, byte value)
+        internal bool TryCommand(InsteonDirectCommands command, byte value)
         {
             WaitAndSetPendingCommand(command, value);
             return TryCommandInternal(command, value);
@@ -333,7 +333,7 @@ namespace Insteon.Network.Device
             Log.WriteLine("Device {0} GetOnLevel", Address.ToString());
             var message = GetStandardMessage(Address, (byte)command, 0);
             Dictionary<PropertyKey, int> properties;
-            var status = network.Messenger.TrySendReceive(message, true, (byte) InsteonModemSerialCommandReceived.StandardMessage, null, out properties); // on-level returned in cmd2 of ACK
+            var status = network.Messenger.TrySendReceive(message, true, (byte) InsteonModemSerialCommand.StandardMessage, null, out properties); // on-level returned in cmd2 of ACK
             if (status == EchoStatus.ACK && properties != null)
             {
                 value = (byte)properties[PropertyKey.Cmd2];

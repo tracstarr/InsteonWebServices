@@ -16,6 +16,15 @@
             DevCat = devCat;
             SubCat = subCat;
             FirmwareVersion = firmwareVersion;
+            ProductKey = null;
+        }
+
+        public InsteonIdentity(byte devCat, byte subCat, byte firmwareVersion, InsteonProductKey productKey): this()
+        {
+            DevCat = devCat;
+            SubCat = subCat;
+            FirmwareVersion = firmwareVersion;
+            ProductKey = productKey;
         }
 
         /// <summary>
@@ -27,6 +36,8 @@
         /// The firmware version running within the device.
         /// </summary>
         public byte FirmwareVersion { get; private set; }
+
+        public InsteonProductKey ProductKey { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this InsteonIdentity is empty.

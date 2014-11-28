@@ -63,7 +63,7 @@ namespace Insteon.Network
             port = SerialPortCreator.Create(connection);
             port.Open();
 
-            byte[] input = { Constants.MessageStartByte, (byte)InsteonModemSerialCommandSend.GetImInfo };
+            byte[] input = { Constants.MessageStartByte, (byte)InsteonModemSerialCommand.GetImInfo };
             var properties = new Dictionary<PropertyKey, int>();
             var response = new List<byte>();
 
@@ -107,7 +107,7 @@ namespace Insteon.Network
 
                     if (response.Count >= offset + 9 &&
                         response[offset] == Constants.MessageStartByte &&
-                        response[offset + 1] == (byte)InsteonModemSerialCommandReceived.GetImInfo &&
+                        response[offset + 1] == (byte)InsteonModemSerialCommand.GetImInfo &&
                         response[offset + 8] == Constants.MessageEndByte)
                     {
                         properties[PropertyKey.Address] = response[offset + 2] << 16 | response[offset + 3] << 8 | response[offset + 4];

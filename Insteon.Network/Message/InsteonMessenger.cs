@@ -64,7 +64,7 @@ namespace Insteon.Network.Message
             Log.WriteLine("Connected to '{0}'", connection);
 
             // disable deadman 0x48 ? TODO: according to spec this should be 00010000 0x10?
-            byte[] message = { (byte)InsteonModemSerialCommandSend.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
+            byte[] message = { (byte)InsteonModemSerialCommand.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
             Send(message);
         }
 
@@ -163,7 +163,7 @@ namespace Insteon.Network.Message
                     Log.WriteLine("Connected to '{0}'", connection);
 
                     // disable deadman 0x48 ? TODO: according to spec this should be 00010000 0x10?
-                    byte[] message = { (byte)InsteonModemSerialCommandSend.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
+                    byte[] message = { (byte)InsteonModemSerialCommand.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
                     TrySend(message);
 
                     return true;
@@ -297,7 +297,7 @@ namespace Insteon.Network.Message
                 return false;
             }
 
-            byte[] message = { (byte)InsteonModemSerialCommandSend.GetImInfo };
+            byte[] message = { (byte)InsteonModemSerialCommand.GetImInfo };
             Dictionary<PropertyKey, int> properties;
             EchoStatus status = TrySendEchoCommand(message, true, 7, out properties);
             if (status == EchoStatus.ACK || status == EchoStatus.NAK)

@@ -20,6 +20,7 @@
         OnBroadcast,
         OnCleanup,
         SetButtonPressed,
-        SuccessBroadcast
+        SuccessBroadcast,
+        ProductDataResponse
     }
 }

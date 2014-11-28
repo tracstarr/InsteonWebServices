@@ -38,16 +38,13 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\ExtendedCommands.cs" />
-    <Compile Include="Commands\GroupCommands.cs" />
-    <Compile Include="Commands\BroadcastCommands.cs" />
-    <Compile Include="Commands\InsteonModemConfigurationFlags.cs" />
-    <Compile Include="Commands\InsteonModemSerialCommandSend.cs" />
+    <Compile Include="Enum\InsteonModemConfigurationFlags.cs" />
+    <Compile Include="Commands\InsteonModemSerialCommand.cs" />
     <Compile Include="Devices\SwitchedLighting.cs" />
+    <Compile Include="Device\InsteonProductKey.cs" />
     <Compile Include="Enum\InsteonDeviceLinkRecordType.cs" />
     <Compile Include="Enum\DeviceLevelEnum.cs" />
     <Compile Include="Enum\DimmerDirection.cs" />
-    <Compile Include="Commands\InsteonModemSerialCommandReceived.cs" />
     <Compile Include="Enum\MessageFlagsStandard.cs" />
     <Compile Include="Enum\MessageTypeFlags.cs" />
     <Compile Include="Message\IMessageProcessor.cs" />

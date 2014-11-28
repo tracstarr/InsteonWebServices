@@ -3,8 +3,13 @@
     /// <summary>
     /// Represents the set of Standard commands that can be sent to an INSTEON device.
     /// </summary>
-    public enum InsteonDirectCommands
+    internal enum InsteonDirectCommands
     {
+        /// <summary>
+        /// For devices after 2/1/7 to aid in looking up product type as devcat and subcat are no longer viable. Responds with ES 0x0300
+        /// </summary>
+        ProductDataRequest = 0x03,
+
         /// <summary>
         /// Commands a device to enter linking mode.
         /// </summary>

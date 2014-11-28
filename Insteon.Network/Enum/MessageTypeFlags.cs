@@ -1,5 +1,8 @@
-﻿namespace Insteon.Network.Enum
+﻿using System;
+
+namespace Insteon.Network.Enum
 {
+    [Flags]
     internal enum MessageTypeFlags: byte
     {
         Ack = 0x20,

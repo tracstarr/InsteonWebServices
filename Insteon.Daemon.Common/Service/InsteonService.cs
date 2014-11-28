@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Insteon.Daemon.Common.Request;
 using Insteon.Daemon.Common.Response;
 using Insteon.Network.Device;
+using Insteon.Network.Enum;
 using ServiceStack;
 
 namespace Insteon.Daemon.Common.Service
@@ -58,6 +59,26 @@ namespace Insteon.Daemon.Common.Service
 
 
             return new ResponseStatus();
+        }
+
+        public ResponseStatus Any(EnterLinkModeRequest request)
+        {
+            if (request.Start && manager.Network.Controller.IsInLinkingMode)
+            {
+                return new ResponseStatus();
+            }
+            if (request.Start && !manager.Network.Controller.IsInLinkingMode)
+            {
+                manager.Network.Controller.EnterLinkMode(InsteonLinkMode.Controller, 0x01);
+                return new ResponseStatus();
+            }
+            if (!request.Start && manager.Network.Controller.IsInLinkingMode)
+            {
+                manager.Network.Controller.CancelLinkMode();
+                return new ResponseStatus();
+            }
+
+            return new ResponseStatus("404", "Cannot change to provided linking mode.");
         }
 
 

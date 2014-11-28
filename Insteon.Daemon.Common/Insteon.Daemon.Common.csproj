@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Request\DimmableLightingRequest.cs" />
+    <Compile Include="Request\EnterLinkModeRequest.cs" />
     <Compile Include="Request\GetDevices.cs" />
     <Compile Include="Request\GetStatus.cs" />
     <Compile Include="Request\InsteonDeviceRequest.cs" />

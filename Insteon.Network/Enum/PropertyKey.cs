@@ -44,6 +44,9 @@
         ResponderGroup,
         ResponderErrorCount,
         SubCat,
-        ToAddress
+        ToAddress,
+        ProductKeyHigh,
+        ProductKeyMid,
+        ProductKeyLow
     }
 }

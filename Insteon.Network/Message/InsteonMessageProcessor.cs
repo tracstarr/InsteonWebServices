@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Insteon.Network.Commands;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
+using Insteon.Network.Helpers;
 
 namespace Insteon.Network.Message
 {
@@ -160,6 +162,7 @@ namespace Insteon.Network.Message
         private static InsteonMessageType GetMessageType(byte[] data, int offset, Dictionary<PropertyKey, int> properties)
         {
             var cmd1 = (byte)properties[PropertyKey.Cmd1];
+            var cmd2 = (byte)properties[PropertyKey.Cmd2];
             var ack = properties[PropertyKey.MessageFlagsAck] != 0;
             var broadcast = properties[PropertyKey.MessageFlagsBroadcast] != 0;
             var allLink = properties[PropertyKey.MessageFlagsAllLink] != 0;
@@ -169,7 +172,17 @@ namespace Insteon.Network.Message
             {
                 messageType = InsteonMessageType.Ack;
             }
-            else if (cmd1 == 0x06 && broadcast && allLink)
+            else if (cmd1 == (byte)InsteonDirectCommands.ProductDataRequest && cmd2 == Byte.MinValue) 
+            {
+                messageType = InsteonMessageType.ProductDataResponse;
+                properties[PropertyKey.ProductKeyHigh] = data[offset + 11];
+                properties[PropertyKey.ProductKeyMid] = data[offset + 12];
+                properties[PropertyKey.ProductKeyLow] = data[offset + 13];
+                properties[PropertyKey.DevCat] = data[offset + 14];
+                properties[PropertyKey.SubCat] = data[offset + 15];
+                properties[PropertyKey.FirmwareVersion] = data[offset + 16];
+            }
+            else if (cmd1 == Constants.SuccessCmd && broadcast && allLink)
             {
                 messageType = InsteonMessageType.SuccessBroadcast;
                 properties[PropertyKey.ResponderCmd1] = data[offset + 4];
@@ -177,58 +190,58 @@ namespace Insteon.Network.Message
                 properties[PropertyKey.ResponderGroup] = data[offset + 6];
                 properties[PropertyKey.ResponderErrorCount] = data[offset + 9];
             }
-            else if (cmd1 == 0x11 && allLink && broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.On && allLink && broadcast)
             {
                 messageType = InsteonMessageType.OnBroadcast;
                 properties[PropertyKey.Group] = data[offset + 5];
             }
-            else if (cmd1 == 0x11 && allLink && !broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.On && allLink && !broadcast)
             {
                 messageType = InsteonMessageType.OnCleanup;
                 properties[PropertyKey.Group] = data[offset + 9];
             }
-            else if (cmd1 == 0x13 && allLink && broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.Off && allLink && broadcast)
             {
                 messageType = InsteonMessageType.OffBroadcast;
                 properties[PropertyKey.Group] = data[offset + 5];
             }
-            else if (cmd1 == 0x13 && allLink && !broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.Off && allLink && !broadcast)
             {
                 messageType = InsteonMessageType.OffCleanup;
                 properties[PropertyKey.Group] = data[offset + 9];
             }
-            else if (cmd1 == 0x12 && allLink && broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.FastOn && allLink && broadcast)
             {
                 messageType = InsteonMessageType.FastOnBroadcast;
                 properties[PropertyKey.Group] = data[offset + 5];
             }
-            else if (cmd1 == 0x12 && allLink && !broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.FastOn && allLink && !broadcast)
             {
                 messageType = InsteonMessageType.FastOnCleanup;
                 properties[PropertyKey.Group] = data[offset + 9];
             }
-            else if (cmd1 == 0x14 && allLink && broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.FastOff && allLink && broadcast)
             {
                 messageType = InsteonMessageType.FastOffBroadcast;
                 properties[PropertyKey.Group] = data[offset + 5];
             }
-            else if (cmd1 == 0x14 && allLink && !broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.FastOff && allLink && !broadcast)
             {
                 messageType = InsteonMessageType.FastOffCleanup;
                 properties[PropertyKey.Group] = data[offset + 9];
             }
-            else if (cmd1 == 0x17 && allLink && broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.StartDimming && allLink && broadcast)
             {
                 messageType = InsteonMessageType.IncrementBeginBroadcast;
                 properties[PropertyKey.Group] = data[offset + 5];
                 properties[PropertyKey.IncrementDirection] = data[offset + 9];
             }
-            else if (cmd1 == 0x18 && allLink && broadcast)
+            else if (cmd1 == (byte)InsteonDirectCommands.StopDimming && allLink && broadcast)
             {
                 messageType = InsteonMessageType.IncrementEndBroadcast;
                 properties[PropertyKey.Group] = data[offset + 5];
             }
-            else if ((cmd1 == 0x01 || cmd1 == 0x02) && broadcast)  // 0x01 == responder, 0x02 = controller
+            else if ((cmd1 == Constants.ResponderCmd || cmd1 == Constants.ControllerCmd) && broadcast)  // 0x01 == responder, 0x02 = controller
             {
                 messageType = InsteonMessageType.SetButtonPressed;
                 properties[PropertyKey.DevCat] = data[offset + 4];
@@ -248,22 +261,35 @@ namespace Insteon.Network.Message
                 return false;
             }
 
-            switch ((InsteonModemSerialCommandReceived)data[offset])
+            switch ((InsteonModemSerialCommand)data[offset])
             {
-                case InsteonModemSerialCommandReceived.StandardMessage:
+                case InsteonModemSerialCommand.StandardMessage:
                     return StandardMessage(data, offset, out count, out message);
-                case InsteonModemSerialCommandReceived.ExtendedMessage:
+                case InsteonModemSerialCommand.ExtendedMessage:
                     return ExtendedMessage(data, offset, out count, out message);
-                case InsteonModemSerialCommandReceived.DeviceLinkingCompleted:
+                case InsteonModemSerialCommand.DeviceLinkingCompleted:
                     return DeviceLinkMessage(data, offset, out count, out message);
-                case InsteonModemSerialCommandReceived.DeviceLinkRecord:
+                case InsteonModemSerialCommand.DeviceLinkRecord:
                     return DeviceLinkRecordMessage(data, offset, out count, out message);
-                case InsteonModemSerialCommandReceived.DeviceCleanup:
+                case InsteonModemSerialCommand.DeviceCleanup:
                     return DeviceLinkCleanupMessage(data, offset, out count, out message);
-                case InsteonModemSerialCommandReceived.GetImInfo:
+                case InsteonModemSerialCommand.GetImInfo:
                     return GetInsteonModemInfo(data, offset, out count, out message);
+                case InsteonModemSerialCommand.ButtonEventReport:
+                    return ButtonEvent(data, offset, out count, out message);
+                default:
+                    Log.WriteLine("Received message {0} but currently not processing it.", (InsteonModemSerialCommand)data[offset]);
+                    break;
             }
 
+            return false;
+        }
+
+        private static bool ButtonEvent(byte[] data, int offset, out int count, out InsteonMessage message)
+        {
+            //todo: something to actually process this.
+            count = 0;
+            message = null;
             return false;
         }
 
