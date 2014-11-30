@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Configuration;
-using System.Reflection;
-#if MONO
 using Mono.Unix;
 using Mono.Unix.Native;
-#endif
+
 using Insteon.Daemon.Common;
 
 namespace Insteon.Daemon
@@ -15,13 +13,14 @@ namespace Insteon.Daemon
         {
             var url = ConfigurationManager.AppSettings["SmartAppUrl"];
             var hostedOn = ConfigurationManager.AppSettings["listenOn"];
+			var insteonConnection = ConfigurationManager.AppSettings ["insteonConnection"];
 
             //Initialize app host
-            var appHost = new InsteonAppListenerHost("serial: COM5", new Uri(url));
+			var appHost = new InsteonAppListenerHost(insteonConnection, new Uri(url));
             appHost.Init();
             appHost.Start(hostedOn);
-#if MONO
-            UnixSignal[] signals = new UnixSignal[] { 
+
+			UnixSignal[] signals = new UnixSignal[] { 
                 new UnixSignal(Signum.SIGINT), 
                 new UnixSignal(Signum.SIGTERM), 
             };
@@ -36,7 +35,6 @@ namespace Insteon.Daemon
                     if (signals[id].IsSet) exit = true;
                 }
             }
-#endif
         }
 
     }

@@ -40,7 +40,7 @@ namespace Insteon.Daemon.Common
                 Network.Devices.DeviceStatusChanged += OnDeviceStatusChanged;
                 Network.Devices.DeviceCommandTimeout += OnDeviceCommandTimeout;
                 Network.Controller.DeviceLinked += OnDeviceLinked;
-                RefreshDeviceDatabase();
+               // RefreshDeviceDatabase();
             }
             return connected;
         }

@@ -3,7 +3,8 @@ using Insteon.Daemon.Common.Request;
 using Insteon.Daemon.Common.Response;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
-using ServiceStack;
+using RestSharp;
+using ResponseStatus = ServiceStack.ResponseStatus;
 
 namespace Insteon.Daemon.Common.Service
 {
@@ -22,7 +23,7 @@ namespace Insteon.Daemon.Common.Service
         //public async Task<GetDevicesResponse> Any(GetDevices request)
         public GetDevicesResponse Any(GetDevices request)
         {
-            var result = new GetDevicesResponse(){Result = new List<string>()};
+            var result = new GetDevicesResponse() { Result = new List<string>() };
 
             foreach (InsteonDevice device in manager.Network.Devices)
             {
@@ -48,15 +49,24 @@ namespace Insteon.Daemon.Common.Service
 
         public ResponseStatus Any(SmartThingsSettingsRequest request)
         {
+            const string smartthingsUrl = "https://graph.api.smartthings.com";
+
             // always reset values
             settings.AuthenticationToken = request.AuthToken;
             settings.Location = request.Location;
-            settings.Url = string.Format("https://graph.api.smartthings.com/api/smartapps/installations/${0}/verify", request.Url);
+            settings.Url = string.Format("/api/smartapps/installations/{0}/authReply", request.Url);
 
-            // some sort of callback to above url for test purpose?
-            var client = new JsonServiceClient("https://graph.api.smartthings.com");
-            var result = client.Put(string.Format("api/smartapps/installations/${0}/authReply?access_token={1}", request.Url, settings.AuthenticationToken));
+            var client = new RestClient(smartthingsUrl);
+            var r = new RestRequest(settings.Url, Method.GET);
+            r.RequestFormat = DataFormat.Json;
+            
+            r.AddQueryParameter("access_token", settings.AuthenticationToken);
+            var response = client.Execute(r);
 
+            if (!response.Content.Contains("ok"))
+            {
+                return new ResponseStatus("500", "Couldn't connect to ST hub");
+            }
 
             return new ResponseStatus();
         }

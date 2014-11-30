@@ -15,7 +15,9 @@ namespace Insteon.WinService
 
             var url = ConfigurationManager.AppSettings["SmartAppUrl"];
             var hostedOn = ConfigurationManager.AppSettings["listenOn"];
-            var appHost = new InsteonAppListenerHost("serial: COM5", new Uri(url));
+			var insteonConnection = ConfigurationManager.AppSettings ["insteonConnection"];
+
+			var appHost = new InsteonAppListenerHost(insteonConnection, new Uri(url));
             
 #if DEBUG
             LogManager.LogFactory = new ConsoleLogFactory();
