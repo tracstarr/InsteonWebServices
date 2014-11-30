@@ -4,12 +4,13 @@ using Insteon.Daemon.Common.Response;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using RestSharp;
-using ResponseStatus = ServiceStack.ResponseStatus;
+using ServiceStack.ServiceHost;
+using ResponseStatus = ServiceStack.ServiceInterface.ServiceModel.ResponseStatus;
 
 namespace Insteon.Daemon.Common.Service
 {
 
-    public class InsteonService : ServiceStack.Service
+    public class InsteonService : IService
     {
         private readonly InsteonManager manager;
         private readonly SmartThingsSettings settings;

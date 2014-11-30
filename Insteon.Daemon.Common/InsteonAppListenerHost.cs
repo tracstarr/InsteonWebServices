@@ -1,7 +1,7 @@
 ﻿using System;
 using Insteon.Daemon.Common.Service;
 using Insteon.Network;
-using ServiceStack;
+using ServiceStack.WebHost.Endpoints;
 
 namespace Insteon.Daemon.Common
 {
@@ -26,7 +26,7 @@ namespace Insteon.Daemon.Common
 	        container.Register(new SmartThingsSettings());
 		}
 
-	    public override ServiceStackHost Start(string urlBase)
+	    public override void Start(string urlBase)
 	    {
 	        var manager = Container.Resolve<InsteonManager>();
 	        var connected = manager.Connect();
@@ -36,7 +36,7 @@ namespace Insteon.Daemon.Common
 	            throw new Exception("Could not connect to Insteon Controller");
 	        }
             
-	        return base.Start(urlBase);
+	        base.Start(urlBase);
 	    }
 
 	    public override void Stop()

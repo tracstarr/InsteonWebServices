@@ -2,7 +2,7 @@
 using System.Configuration;
 using System.Threading;
 using Insteon.Daemon.Common;
-using ServiceStack.Logging;
+
 
 namespace Insteon.WinService
 {
@@ -20,7 +20,7 @@ namespace Insteon.WinService
 			var appHost = new InsteonAppListenerHost(insteonConnection, new Uri(url));
             
 #if DEBUG
-            LogManager.LogFactory = new ConsoleLogFactory();
+         //   LogManager.LogFactory = new ConsoleLogFactory();
 			Console.WriteLine("Running Insteon.WinService in Console mode");
 			try
 			{

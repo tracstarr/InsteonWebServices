@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using ServiceStack;
+using ServiceStack.ServiceHost;
 
 namespace Insteon.Daemon.Common.Request
 {

@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using Insteon.Network;
-using ServiceStack;
+using ServiceStack.ServiceInterface.ServiceModel;
 
 namespace Insteon.Daemon.Common.Response
 {

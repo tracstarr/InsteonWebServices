@@ -1,5 +1,5 @@
 ﻿using System.ServiceProcess;
-using ServiceStack;
+using ServiceStack.WebHost.Endpoints;
 
 namespace Insteon.WinService
 {

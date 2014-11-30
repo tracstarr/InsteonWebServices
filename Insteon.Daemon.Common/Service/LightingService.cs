@@ -1,11 +1,12 @@
 ﻿using Insteon.Daemon.Common.Request;
 using Insteon.Network.Device;
 using Insteon.Network.Devices;
-using ServiceStack;
+using ServiceStack.ServiceHost;
+using ServiceStack.ServiceInterface.ServiceModel;
 
 namespace Insteon.Daemon.Common.Service
 {
-    public class LightingService : ServiceStack.Service
+    public class LightingService : IService
     {
         private readonly InsteonManager manager;
         private readonly SmartThingsSettings settings;
