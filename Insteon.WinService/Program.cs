@@ -10,14 +10,10 @@ namespace Insteon.WinService
 	{
 		static void Main()
 		{
-
-            
-
-            var url = ConfigurationManager.AppSettings["SmartAppUrl"];
             var hostedOn = ConfigurationManager.AppSettings["listenOn"];
 			var insteonConnection = ConfigurationManager.AppSettings ["insteonConnection"];
 
-			var appHost = new InsteonAppListenerHost(insteonConnection, new Uri(url));
+			var appHost = new InsteonAppListenerHost(insteonConnection);
             
 #if DEBUG
          //   LogManager.LogFactory = new ConsoleLogFactory();

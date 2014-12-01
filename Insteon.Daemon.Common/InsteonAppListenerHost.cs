@@ -9,19 +9,17 @@ namespace Insteon.Daemon.Common
 		: AppHostHttpListenerBase
 	{
 	    private readonly string insteonSource;
-	    private readonly Uri smartAppUri;
-
-	    public InsteonAppListenerHost(string insteonSource, Uri smartAppUri)
+	    
+	    public InsteonAppListenerHost(string insteonSource)
 			: base("Insteon HttpListener", typeof(InsteonService).Assembly)
 		{
 		    this.insteonSource = insteonSource;
-		    this.smartAppUri = smartAppUri;
 		}
 
 	    public override void Configure(Funq.Container container)
 		{
             // will throw if cannot make connection
-            var manager = new InsteonManager(insteonSource, smartAppUri);
+            var manager = new InsteonManager(insteonSource);
             container.Register(manager);
 	        container.Register(new SmartThingsSettings());
 		}

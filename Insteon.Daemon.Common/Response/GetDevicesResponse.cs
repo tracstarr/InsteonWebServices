@@ -5,7 +5,7 @@ namespace Insteon.Daemon.Common.Response
 {
     public class GetDevicesResponse : IHasResponseStatus
     {		
-        public IList<string> Result { get; set; }		
+        public IList<DeviceInfo> Devices { get; set; }		
         public ResponseStatus ResponseStatus { get; set; }
     }
 }

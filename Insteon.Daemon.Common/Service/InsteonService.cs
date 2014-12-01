@@ -3,9 +3,9 @@ using Insteon.Daemon.Common.Request;
 using Insteon.Daemon.Common.Response;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
-using RestSharp;
+using Insteon.Network.Helpers;
 using ServiceStack.ServiceHost;
-using ResponseStatus = ServiceStack.ServiceInterface.ServiceModel.ResponseStatus;
+using ServiceStack.ServiceInterface.ServiceModel;
 
 namespace Insteon.Daemon.Common.Service
 {
@@ -14,23 +14,21 @@ namespace Insteon.Daemon.Common.Service
     {
         private readonly InsteonManager manager;
         private readonly SmartThingsSettings settings;
-
+        
         public InsteonService(InsteonManager manager, SmartThingsSettings settings)
         {
             this.manager = manager;
             this.settings = settings;
         }
-
-        //public async Task<GetDevicesResponse> Any(GetDevices request)
+        
         public GetDevicesResponse Any(GetDevices request)
         {
-            var result = new GetDevicesResponse() { Result = new List<string>() };
+            var result = new GetDevicesResponse() { Devices = new List<DeviceInfo>() };
 
             foreach (InsteonDevice device in manager.Network.Devices)
             {
-                result.Result.Add(device.Address.ToString());
+                result.Devices.Add(new DeviceInfo(){Address = device.Address.ToString(), Category = device.Identity.GetDeviceCategoryName()});
             }
-
 
             return result;
         }
@@ -50,26 +48,25 @@ namespace Insteon.Daemon.Common.Service
 
         public ResponseStatus Any(SmartThingsSettingsRequest request)
         {
-            const string smartthingsUrl = "https://graph.api.smartthings.com";
-
             // always reset values
-            settings.AuthenticationToken = request.AuthToken;
+            settings.AccessToken = request.AccessToken;
             settings.Location = request.Location;
-            settings.Url = string.Format("/api/smartapps/installations/{0}/authReply", request.Url);
+            settings.ApplicationId = request.AppId;
 
-            var client = new RestClient(smartthingsUrl);
-            var r = new RestRequest(settings.Url, Method.GET);
-            r.RequestFormat = DataFormat.Json;
-            
-            r.AddQueryParameter("access_token", settings.AuthenticationToken);
-            var response = client.Execute(r);
+            var cb = new SmartThingsCallbacks(settings);
 
-            if (!response.Content.Contains("ok"))
-            {
-                return new ResponseStatus("500", "Couldn't connect to ST hub");
-            }
+            return !cb.Authorization() ? new ResponseStatus("404", "Couldn't connect to ST hub") : new ResponseStatus();
+        }
 
-            return new ResponseStatus();
+        public ResponseStatus Any(SmartThingsSettingsResetRequest request)
+        {
+            settings.AccessToken = null;
+            settings.Location = null;
+            settings.ApplicationId = null;
+
+            var cb = new SmartThingsCallbacks(settings);
+
+            return !cb.AuthorizationRevoke() ? new ResponseStatus("404", "Couldn't connect to ST hub") : new ResponseStatus();
         }
 
         public ResponseStatus Any(EnterLinkModeRequest request)

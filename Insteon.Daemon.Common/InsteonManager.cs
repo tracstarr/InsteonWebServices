@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Insteon.Daemon.Common.Service;
 using Insteon.Network;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
@@ -10,13 +11,11 @@ namespace Insteon.Daemon.Common
     public sealed class InsteonManager
     {
         private readonly ILog logger = LogManager.GetLogger(typeof(InsteonManager));
-        private readonly Uri smartAppUri;
-
+        
         public InsteonConnection Connection { get; private set; }
         public InsteonNetwork Network { get; private set; }
-        public InsteonManager(string insteonSource, Uri smartAppUri)
+        public InsteonManager(string insteonSource)
         {
-            this.smartAppUri = smartAppUri;
             InsteonConnection iConnection;
             if (InsteonConnection.TryParse(insteonSource, out iConnection))
             {

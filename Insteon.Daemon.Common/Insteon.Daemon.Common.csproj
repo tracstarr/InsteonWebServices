@@ -66,9 +66,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +74,8 @@
     <Compile Include="Request\GetDevices.cs" />
     <Compile Include="Request\GetStatus.cs" />
     <Compile Include="Request\InsteonDeviceRequest.cs" />
+    <Compile Include="Request\SmartThingsSettingsResetRequest.cs" />
+    <Compile Include="Response\DeviceInfo.cs" />
     <Compile Include="Response\GetDevicesResponse.cs" />
     <Compile Include="InsteonAppListenerHost.cs" />
     <Compile Include="InsteonManager.cs" />
@@ -85,6 +84,7 @@
     <Compile Include="Request\SwitchedLightingRequest.cs" />
     <Compile Include="Request\SmartThingsSettingsRequest.cs" />
     <Compile Include="Service\LightingService.cs" />
+    <Compile Include="Service\SmartThingsCallbacks.cs" />
     <Compile Include="SmartThingsSettings.cs" />
   </ItemGroup>
   <ItemGroup>

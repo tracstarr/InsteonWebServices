@@ -2,8 +2,8 @@
 {
     public class SmartThingsSettings
     {
-        public string AuthenticationToken { get; set; }
-        public string Url { get; set; }
+        public string AccessToken { get; set; }
+        public string ApplicationId { get; set; }
         public string Location { get; set; }
     }
 }

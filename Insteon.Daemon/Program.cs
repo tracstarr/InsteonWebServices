@@ -1,5 +1,4 @@
-﻿using System;
-using System.Configuration;
+﻿using System.Configuration;
 using Mono.Unix;
 using Mono.Unix.Native;
 
@@ -11,19 +10,19 @@ namespace Insteon.Daemon
     {
         static void Main(string[] args)
         {
-            var url = ConfigurationManager.AppSettings["SmartAppUrl"];
             var hostedOn = ConfigurationManager.AppSettings["listenOn"];
 			var insteonConnection = ConfigurationManager.AppSettings ["insteonConnection"];
 
             //Initialize app host
-			var appHost = new InsteonAppListenerHost(insteonConnection, new Uri(url));
+			var appHost = new InsteonAppListenerHost(insteonConnection);
             appHost.Init();
             appHost.Start(hostedOn);
 
-			UnixSignal[] signals = new UnixSignal[] { 
-                new UnixSignal(Signum.SIGINT), 
-                new UnixSignal(Signum.SIGTERM), 
-            };
+			UnixSignal[] signals =
+			{ 
+			    new UnixSignal(Signum.SIGINT), 
+			    new UnixSignal(Signum.SIGTERM), 
+			};
 
             // Wait for a unix signal
             for (bool exit = false; !exit; )

@@ -2,11 +2,11 @@ using ServiceStack.ServiceHost;
 
 namespace Insteon.Daemon.Common.Request
 {
-    [Route("/configure/{location}/{url}/{authToken}")]
+    [Route("/configure/{location}/{AppId}/{AccessToken}")]
     public class SmartThingsSettingsRequest
     {
         public string Location { get; set; }
-        public string Url { get; set; }
-        public string AuthToken { get; set; }
+        public string AppId { get; set; }
+        public string AccessToken { get; set; }
     }
 }
