@@ -49,6 +49,12 @@ namespace Insteon.Network.Serial
             }
             int count = port.BytesToRead;
             var data = new byte[count];
+            
+            // added for mono
+            if (count == 0)
+            {
+                return data;
+            }
             port.Read(data, 0, count);
             return data;
         }

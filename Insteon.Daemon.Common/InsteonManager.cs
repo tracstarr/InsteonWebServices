@@ -16,9 +16,11 @@ namespace Insteon.Daemon.Common
         public InsteonNetwork Network { get; private set; }
         public InsteonManager(string insteonSource)
         {
+            logger.Debug("Creating insteon manager");
             InsteonConnection iConnection;
             if (InsteonConnection.TryParse(insteonSource, out iConnection))
             {
+                logger.DebugFormat("Parsed InsteonConnection to {0}", iConnection.ToString());
                 Connection = iConnection;
             }
             else
@@ -31,6 +33,7 @@ namespace Insteon.Daemon.Common
 
         public bool Connect()
         {
+            logger.Debug("Trying to connect to insteon controller.");
             var connected = Network.TryConnect(Connection);
 
             if (connected)
@@ -38,7 +41,7 @@ namespace Insteon.Daemon.Common
                 Network.Devices.DeviceStatusChanged += OnDeviceStatusChanged;
                 Network.Devices.DeviceCommandTimeout += OnDeviceCommandTimeout;
                 Network.Controller.DeviceLinked += OnDeviceLinked;
-               // RefreshDeviceDatabase();
+                RefreshDeviceDatabase();
             }
             return connected;
         }

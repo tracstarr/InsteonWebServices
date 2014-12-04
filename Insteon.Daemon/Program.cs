@@ -1,22 +1,14 @@
-﻿using System.Configuration;
-using Mono.Unix;
+﻿using Mono.Unix;
 using Mono.Unix.Native;
-
 using Insteon.Daemon.Common;
 
 namespace Insteon.Daemon
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            var hostedOn = ConfigurationManager.AppSettings["listenOn"];
-			var insteonConnection = ConfigurationManager.AppSettings ["insteonConnection"];
-
-            //Initialize app host
-			var appHost = new InsteonAppListenerHost(insteonConnection);
-            appHost.Init();
-            appHost.Start(hostedOn);
+            ServiceStartup.Main();
 
 			UnixSignal[] signals =
 			{ 

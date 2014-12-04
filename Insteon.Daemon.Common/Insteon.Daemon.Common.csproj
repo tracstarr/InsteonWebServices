@@ -64,6 +64,7 @@
       <HintPath>..\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
@@ -79,6 +80,7 @@
     <Compile Include="Response\GetDevicesResponse.cs" />
     <Compile Include="InsteonAppListenerHost.cs" />
     <Compile Include="InsteonManager.cs" />
+    <Compile Include="ServiceStartup.cs" />
     <Compile Include="Service\InsteonService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Request\SwitchedLightingRequest.cs" />
