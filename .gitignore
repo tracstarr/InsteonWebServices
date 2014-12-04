@@ -189,3 +189,4 @@ _Pvt_Extensions/
 ModelManifest.xml
 /Insteon.Daemon.Common/Visual Studio 2013/Visualizers
 *.userprefs
+/Insteon.Network/Visual Studio 2013/Visualizers

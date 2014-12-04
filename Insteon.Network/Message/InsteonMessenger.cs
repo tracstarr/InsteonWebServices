@@ -7,6 +7,7 @@ using Insteon.Network.Commands;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
+using ServiceStack.Logging;
 
 namespace Insteon.Network.Message
 {
@@ -19,6 +20,7 @@ namespace Insteon.Network.Message
     //  - Reporting back to the bridge whether or not each message is valid, and if valid the size in bytes of the message.
     internal class InsteonMessenger : IMessageProcessor
     {
+        private ILog logger = LogManager.GetLogger(typeof(InsteonMessenger));
         private readonly InsteonNetworkBridge bridge;
         private readonly Dictionary<string, Timer> duplicates = new Dictionary<string, Timer>(); // used to detect duplicate messages
         private readonly InsteonNetwork network;
@@ -61,7 +63,7 @@ namespace Insteon.Network.Message
             {
                 ControllerProperties = bridge.Connect(connection);
             }
-            Log.WriteLine("Connected to '{0}'", connection);
+            logger.DebugFormat("Connected to '{0}'", connection);
 
             // disable deadman 0x48 ? TODO: according to spec this should be 00010000 0x10?
             byte[] message = { (byte)InsteonModemSerialCommand.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
@@ -106,7 +108,7 @@ namespace Insteon.Network.Message
                 int address = message.Properties[PropertyKey.FromAddress];
                 if (network.Devices.ContainsKey(address))
                 {
-                    Log.WriteLine("Device {0} received message {1}", InsteonAddress.Format(address), message.ToString());
+                    logger.DebugFormat("Device {0} received message {1}", InsteonAddress.Format(address), message.ToString());
                     InsteonDevice device = network.Devices.Find(address);
                     device.OnMessage(message);
                 }
@@ -116,18 +118,18 @@ namespace Insteon.Network.Message
                 }
                 else if (network.AutoAdd)
                 {
-                    Log.WriteLine("Unknown device {0} received message {1}, adding device", InsteonAddress.Format(address), message.ToString());
+                    logger.DebugFormat("Unknown device {0} received message {1}, adding device", InsteonAddress.Format(address), message.ToString());
                     InsteonDevice device = network.Devices.Add(new InsteonAddress(address), new InsteonIdentity());
                     device.OnMessage(message);
                 }
                 else
                 {
-                    Log.WriteLine("WARNING: Unknown device {0} received message {1}. Could be Identification process.", InsteonAddress.Format(address), message.ToString());
+                    logger.WarnFormat("Unknown device {0} received message {1}. Could be Identification process.", InsteonAddress.Format(address), message.ToString());
                 }
             }
             else
             {
-                Log.WriteLine("Controller received message {0}", message.ToString());
+                logger.DebugFormat("Controller received message {0}", message.ToString());
                 network.Controller.OnMessage(message);
             }
         }
@@ -154,13 +156,13 @@ namespace Insteon.Network.Message
             {
                 try
                 {
-                    Log.WriteLine("Trying connection '{0}'...", connection.ToString());
+                    logger.DebugFormat("Trying connection '{0}'...", connection.ToString());
 
                     lock (bridge)
                     {
                         ControllerProperties = bridge.Connect(connection);
                     }
-                    Log.WriteLine("Connected to '{0}'", connection);
+                    logger.DebugFormat("Connected to '{0}'", connection);
 
                     // disable deadman 0x48 ? TODO: according to spec this should be 00010000 0x10?
                     byte[] message = { (byte)InsteonModemSerialCommand.SetConfiguration, (byte)InsteonModemConfigurationFlags.DisableDeadman };
@@ -170,7 +172,7 @@ namespace Insteon.Network.Message
                 }
                 catch (Exception ex)
                 {
-                    Log.WriteLine("ERROR: Could not connect to '{0}'. {1}", connection.ToString(), ex.Message);
+                    logger.ErrorFormat("Could not connect to '{0}'. {1}", connection.ToString(), ex.Message);
                 }
             }
             return false;
@@ -194,15 +196,15 @@ namespace Insteon.Network.Message
                 }
                 catch (InvalidOperationException)
                 {
-                    Log.WriteLine("ERROR: Bridge send command fatal error");
+                    logger.ErrorFormat("Bridge send command fatal error");
                 }
                 catch (IOException)
                 {
-                    Log.WriteLine("ERROR: Bridge send command fatal error");
+                    logger.ErrorFormat("Bridge send command fatal error");
                 }
                 catch (Exception ex)
                 {
-                    Log.WriteLine("ERROR: Unexpected failure... {0}", ex.Message);
+                    logger.ErrorFormat("Unexpected failure... {0}", ex.Message);
                     if (Debugger.IsAttached)
                     {
                         throw;
@@ -216,7 +218,7 @@ namespace Insteon.Network.Message
 
             if (status == EchoStatus.None)
             {
-                Log.WriteLine("ERROR: No response from serial port");
+                logger.ErrorFormat("No response from serial port");
                 network.OnDisconnected();
             }
 
@@ -257,7 +259,7 @@ namespace Insteon.Network.Message
                 }
                 else
                 {
-                    Log.WriteLine("ERROR: Did not receive expected message reply; SentMessage='{0}', ExpectedReceiveMessageId={1:X2}, Timeout={2}ms", Utilities.ByteArrayToString(message), receiveMessageId, Constants.sendReceiveTimeout);
+                    logger.ErrorFormat("Did not receive expected message reply; SentMessage='{0}', ExpectedReceiveMessageId={1:X2}, Timeout={2}ms", Utilities.ByteArrayToString(message), receiveMessageId, Constants.sendReceiveTimeout);
                 }
             }
 
@@ -305,7 +307,7 @@ namespace Insteon.Network.Message
                 return true;
             }
 
-            Log.WriteLine("ERROR: Verify connection failed");
+            logger.ErrorFormat("Verify connection failed");
             network.OnDisconnected();
             return false;
         }
@@ -317,13 +319,13 @@ namespace Insteon.Network.Message
             {
                 if (!IsDuplicateMessage(message))
                 {
-                    Log.WriteLine("PROCESSOR: Message '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
+                    logger.DebugFormat("PROCESSOR: Message '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
                     OnMessage(message);
                     UpdateWaitItems(message);
                 }
                 else
                 {
-                    Log.WriteLine("PROCESSOR: Message '{0}' duplicate ignored...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
+                    logger.DebugFormat("PROCESSOR: Message '{0}' duplicate ignored...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
                 }
                 return true;
             }
@@ -337,7 +339,7 @@ namespace Insteon.Network.Message
             {
                 if (InsteonMessageProcessor.ProcessMessage(data, offset, out count, out echoMessage))
                 {
-                    Log.WriteLine("PROCESSOR: Echo '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), echoMessage.ToString("Log"));
+                    logger.DebugFormat("PROCESSOR: Echo '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), echoMessage.ToString("Log"));
                     return true;
                 }
                 return false;
@@ -345,7 +347,7 @@ namespace Insteon.Network.Message
             if (Utilities.ArraySequenceEquals(sentMessage, message))
             {
                 count = sentMessage.Length;
-                Log.WriteLine("PROCESSOR: Echo '{0}' matched", Utilities.ByteArrayToString(data, offset, count));
+                logger.DebugFormat("PROCESSOR: Echo '{0}' matched", Utilities.ByteArrayToString(data, offset, count));
                 return true;
             }
             count = 0;

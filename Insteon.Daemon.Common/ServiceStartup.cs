@@ -35,7 +35,7 @@ namespace Insteon.Daemon.Common
             }
             catch (Exception ex)
             {
-                logger.ErrorFormat("ERROR: {0}: {1}", ex.GetType().Name, ex.Message);
+                logger.ErrorFormat("{0}: {1}", ex.GetType().Name, ex.Message);
                 throw;
             }
         }

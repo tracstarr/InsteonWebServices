@@ -4,12 +4,14 @@ using Insteon.Network.Commands;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
+using ServiceStack.Logging;
 
 namespace Insteon.Network.Message
 {
     // This class is responsible for processing raw binary messages into a structured message result that includes the type of message and a property list.
     internal static class InsteonMessageProcessor
     {
+        private static ILog logger = LogManager.GetLogger(typeof(InsteonMessageProcessor));
         private static bool DeviceLinkCleanupMessage(byte[] data, int offset, out int count, out InsteonMessage message)
         {
             message = null;
@@ -278,7 +280,7 @@ namespace Insteon.Network.Message
                 case InsteonModemSerialCommand.ButtonEventReport:
                     return ButtonEvent(data, offset, out count, out message);
                 default:
-                    Log.WriteLine("Received message {0} but currently not processing it.", (InsteonModemSerialCommand)data[offset]);
+                    logger.DebugFormat("Received message {0} but currently not processing it.", (InsteonModemSerialCommand)data[offset]);
                     break;
             }
 

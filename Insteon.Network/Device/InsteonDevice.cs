@@ -6,6 +6,7 @@ using Insteon.Network.Commands;
 using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
 using Insteon.Network.Message;
+using ServiceStack.Logging;
 
 namespace Insteon.Network.Device
 {
@@ -14,6 +15,7 @@ namespace Insteon.Network.Device
     /// </summary>
     public class InsteonDevice
     {
+        private ILog logger = LogManager.GetLogger(typeof(InsteonDevice));
         private readonly Timer ackTimer; // timeout to receive ACK from device
         private readonly InsteonNetwork network;
         private readonly AutoResetEvent pendingEvent = new AutoResetEvent(false);
@@ -274,12 +276,12 @@ namespace Insteon.Network.Device
 
             if (retry)
             {
-                Log.WriteLine("WARNING: Device {0} Command {1} timed out, retry {2} of {3}...", Address.ToString(), command, retryCount, Constants.deviceCommandRetries);
+                logger.WarnFormat("Device {0} Command {1} timed out, retry {2} of {3}...", Address.ToString(), command, retryCount, Constants.deviceCommandRetries);
                 TryCommandInternal(command, value);
             }
             else
             {
-                Log.WriteLine("ERROR: Device {0} Command {1} timed out", Address.ToString(), command);
+                logger.ErrorFormat("Device {0} Command {1} timed out", Address.ToString(), command);
                 OnDeviceCommandTimeout();
             }
         }
@@ -305,7 +307,7 @@ namespace Insteon.Network.Device
         private bool TryCommandInternal(InsteonDirectCommands command, byte value)
         {
             var message = GetStandardMessage(Address, (byte)command, value);
-            Log.WriteLine("Device {0} Command(command:{1}, value:{2:X2})", Address.ToString(), command.ToString(), value);
+            logger.DebugFormat("Device {0} Command(command:{1}, value:{2:X2})", Address.ToString(), command.ToString(), value);
 
             var status = network.Messenger.TrySend(message);
             if (status == EchoStatus.ACK)
@@ -330,14 +332,14 @@ namespace Insteon.Network.Device
         {
             var command = InsteonDirectCommands.StatusRequest;
             WaitAndSetPendingCommand(command, 0);
-            Log.WriteLine("Device {0} GetOnLevel", Address.ToString());
+            logger.DebugFormat("Device {0} GetOnLevel", Address.ToString());
             var message = GetStandardMessage(Address, (byte)command, 0);
             Dictionary<PropertyKey, int> properties;
             var status = network.Messenger.TrySendReceive(message, true, (byte) InsteonModemSerialCommand.StandardMessage, null, out properties); // on-level returned in cmd2 of ACK
             if (status == EchoStatus.ACK && properties != null)
             {
                 value = (byte)properties[PropertyKey.Cmd2];
-                Log.WriteLine("Device {0} GetOnLevel returning {1:X2}", Address.ToString(), value);
+                logger.DebugFormat("Device {0} GetOnLevel returning {1:X2}", Address.ToString(), value);
                 return true;
             }
             ClearPendingCommand();
@@ -399,12 +401,12 @@ namespace Insteon.Network.Device
             }
 
             // block current thread if a command is pending
-            Log.WriteLine("Device {0} blocking command {1} for pending command {2}", Address.ToString(), command.ToString(), latchedPendingCommand.ToString());
+            logger.DebugFormat("Device {0} blocking command {1} for pending command {2}", Address.ToString(), command.ToString(), latchedPendingCommand.ToString());
             pendingEvent.Reset();
             if (!pendingEvent.WaitOne(Constants.deviceAckTimeout)) // wait at most deviceAckTimeout seconds
             {
                 ClearPendingCommand(); // break deadlock and warn
-                Log.WriteLine("WARNING: Device {0} unblocking command {1} for pending command {2}", Address.ToString(), command.ToString(), latchedPendingCommand.ToString());
+                logger.WarnFormat("Device {0} unblocking command {1} for pending command {2}", Address.ToString(), command.ToString(), latchedPendingCommand.ToString());
             }
 
             WaitAndSetPendingCommand(command, value); // try again

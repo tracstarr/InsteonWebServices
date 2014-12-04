@@ -8,6 +8,7 @@ using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
 using Insteon.Network.Message;
+using ServiceStack.Logging;
 
 namespace Insteon.Network
 {
@@ -16,6 +17,7 @@ namespace Insteon.Network
     /// </summary>
     public class InsteonNetwork
     {
+        private ILog logger = LogManager.GetLogger(typeof(InsteonNetwork));
         private List<InsteonConnection> connections;
 
         /// <summary>
@@ -103,11 +105,11 @@ namespace Insteon.Network
         /// </remarks>
         public void Close()
         {
-            Log.WriteLine("Closing INSTEON network...");
+            logger.DebugFormat("Closing INSTEON network...");
             OnClosing();
             Messenger.Close();
             Connection = null;
-            Log.WriteLine("INSTEON network closed");
+            logger.DebugFormat("INSTEON network closed");
         }
 
         internal void Disconnect()
@@ -241,20 +243,6 @@ namespace Insteon.Network
         }
 
         /// <summary>
-        /// Sets the folder path where INSTEON log files will be written.
-        /// </summary>
-        /// <param name="path">Full path to the specified folder.</param>
-        /// <remarks>Folder must exist or an error will occur.</remarks>
-        public static void SetLogPath(string path)
-        {
-            if (!Directory.Exists(path))
-            {
-                throw new DirectoryNotFoundException();
-            }
-            Log.Open(path);
-        }
-
-        /// <summary>
         /// Attempts to locate an INSTEON controller by first searching the Smarthome web service to connect over the network, and then by searching the serial ports for a compatible controller.
         /// The first successful connection will be returned.
         /// </summary>
@@ -275,7 +263,7 @@ namespace Insteon.Network
 
             foreach (InsteonConnection connection in connections)
             {
-                Log.WriteLine("Available connection '{0}'", connection.ToString());
+                logger.DebugFormat("Available connection '{0}'", connection.ToString());
             }
 
             return TryConnect(connections);

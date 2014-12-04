@@ -5,8 +5,8 @@ using System.Timers;
 using Insteon.Network.Commands;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
-using Insteon.Network.Helpers;
 using Insteon.Network.Message;
+using ServiceStack.Logging;
 
 namespace Insteon.Network
 {
@@ -15,6 +15,7 @@ namespace Insteon.Network
     /// </summary>
     public class InsteonController
     {
+        private ILog logger = LogManager.GetLogger(typeof (InsteonController));
         private readonly InsteonNetwork network;
         private readonly Timer timer = new Timer();
         private InsteonLinkMode? linkingMode;
@@ -184,7 +185,7 @@ namespace Insteon.Network
             IsInLinkingMode = false;
             linkingMode = null;
             byte[] message = { (byte)InsteonModemSerialCommand.CancelAllLink };
-            Log.WriteLine("Controller {0} CancelLinkMode", Address.ToString());
+            logger.DebugFormat("Controller {0} CancelLinkMode", Address.ToString());
             return network.Messenger.TrySend(message) == EchoStatus.ACK;
         }
 
@@ -203,7 +204,7 @@ namespace Insteon.Network
         {
             linkingMode = mode;
             byte[] message = { (byte)InsteonModemSerialCommand.StartAllLink, (byte)mode, group };
-            Log.WriteLine("Controller {0} EnterLinkMode(mode:{1}, group:{2:X2})", Address.ToString(), mode.ToString(), group);
+            logger.DebugFormat("Controller {0} EnterLinkMode(mode:{1}, group:{2:X2})", Address.ToString(), mode.ToString(), group);
             if (network.Messenger.TrySend(message) != EchoStatus.ACK)
             {
                 return false;
@@ -222,47 +223,26 @@ namespace Insteon.Network
         /// </remarks>
         public bool TryGetLinks(out InsteonDeviceLinkRecord[] links)
         {
-            if (TryGetLinksInternal(out links))
-            {
-                return true;
-            }
-
-            const int retryCount = 3;
-            for (var retry = 0; retry < retryCount; ++retry)
-            {
-                Log.WriteLine("WARNING: Controller {0} GetLinks failed, retry {1} of {2}", Address.ToString(), retry, retryCount);
-                if (TryGetLinksInternal(out links))
-                {
-                    return true;
-                }
-            }
-
-            Log.WriteLine("ERROR: Controller {0} GetLinks failed", Address.ToString());
-            return false;
-        }
-
-        private bool TryGetLinksInternal(out InsteonDeviceLinkRecord[] links)
-        {
             links = null;
             var list = new List<InsteonDeviceLinkRecord>();
             Dictionary<PropertyKey, int> properties;
             EchoStatus status;
 
-            Log.WriteLine("Controller {0} GetLinks", Address.ToString());
+            logger.DebugFormat("Controller {0} GetLinks", Address.ToString());
             byte[] message1 = { (byte)InsteonModemSerialCommand.GetFirstAllLinkRecord };
             status = network.Messenger.TrySendReceive(message1, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
 
             if (status == EchoStatus.NAK)
             {
                 links = new InsteonDeviceLinkRecord[0]; // empty link table
-                Log.WriteLine("Controller {0} GetLinks returned no links, empty link table", Address.ToString());
+                logger.DebugFormat("Controller {0} GetLinks returned no links, empty link table", Address.ToString());
                 return true;
             }
             if (status == EchoStatus.ACK)
             {
                 if (properties == null)
                 {
-                    Log.WriteLine("ERROR: Controller {0} null properties object", Address.ToString());
+                    logger.ErrorFormat("Controller {0} null properties object", Address.ToString());
                     return false;
                 }
                 list.Add(new InsteonDeviceLinkRecord(properties));
@@ -272,14 +252,14 @@ namespace Insteon.Network
                 return false; // echo was not ACK or NAK
             }
 
-            Log.WriteLine("Controller {0} GetLinks", Address.ToString());
+            logger.DebugFormat("Controller {0} GetLinks", Address.ToString());
             byte[] message2 = { (byte)InsteonModemSerialCommand.GetNextDeviceLinkRecord };
             status = network.Messenger.TrySendReceive(message2, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
             while (status == EchoStatus.ACK)
             {
                 if (properties == null)
                 {
-                    Log.WriteLine("ERROR: Controller {0} null properties object", Address.ToString());
+                    logger.ErrorFormat("Controller {0} null properties object", Address.ToString());
                     return false;
                 }
                 list.Add(new InsteonDeviceLinkRecord(properties));
@@ -292,41 +272,21 @@ namespace Insteon.Network
             }
 
             links = list.ToArray();
-            Log.WriteLine("Controller {0} GetLinks returned {1} links", Address.ToString(), links.Length);
+            logger.DebugFormat("Controller {0} GetLinks returned {1} links", Address.ToString(), links.Length);
             return true;
         }
 
         public bool TryGetLinkIdentity(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
         {
-            if (TryGetLinkIdentityInternal(link, out identity))
-            {
-                return true;
-            }
-
-            const int retryCount = 3;
-            for (var retry = 0; retry < retryCount; ++retry)
-            {
-                Log.WriteLine("WARNING: Controller {0} GetLinkIdentity failed, retry {1} of {2}", Address.ToString(), retry, retryCount);
-                if (TryGetLinkIdentityInternal(link, out identity))
-                {
-                    return true;
-                }
-            }
-
-            Log.WriteLine("ERROR: Controller {0} GetLinkIdentity failed", Address.ToString());
-            return false;
-        }
-
-        private bool TryGetLinkIdentityInternal(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
-        {
-            return GetProductData(link, out identity) || GetLinkIdentity(link, out identity);
+            //GetProductData(link, out identity) ||
+            return  GetLinkIdentity(link, out identity);
         }
 
         private bool GetLinkIdentity(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
         {
             Dictionary<PropertyKey, int> properties;
 
-            Log.WriteLine("Controller {0} GetLinkIdentity", Address.ToString());
+            logger.DebugFormat("Controller {0} GetLinkIdentity", Address.ToString());
             byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, link.Address[2], link.Address[1], link.Address[0], 
                                  (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, (byte)InsteonDirectCommands.IDRequest, Byte.MinValue };
 
@@ -334,7 +294,7 @@ namespace Insteon.Network
 
             if (status == EchoStatus.NAK)
             {
-                Log.WriteLine("ERROR: received NAK trying to get idendity information");
+                logger.ErrorFormat("received NAK trying to get idendity information");
                 identity = null;
                 return false;
             }
@@ -342,7 +302,7 @@ namespace Insteon.Network
             {
                 if (properties == null)
                 {
-                    Log.WriteLine("ERROR: Device Id {0} has null properties object", Address.ToString());
+                    logger.ErrorFormat("Device Id {0} has null properties object", Address.ToString());
                     identity = null;
                     return false;
                 }
@@ -351,7 +311,7 @@ namespace Insteon.Network
 
             }
 
-            Log.WriteLine("ERROR: received unknown status trying to get idendity information");
+            logger.ErrorFormat("received unknown status trying to get idendity information");
             identity = null;
             return false; // echo was not ACK or NAK
         }
@@ -360,7 +320,7 @@ namespace Insteon.Network
         {
             Dictionary<PropertyKey, int> properties;
 
-            Log.WriteLine("Controller {0} GetLinkProductData", Address.ToString());
+            logger.DebugFormat("Controller {0} GetLinkProductData", Address.ToString());
             byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, link.Address[2], link.Address[1], link.Address[0], 
                                  (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, (byte)InsteonDirectCommands.ProductDataRequest, Byte.MinValue };
 
@@ -368,7 +328,7 @@ namespace Insteon.Network
 
             if (status == EchoStatus.NAK)
             {
-                Log.WriteLine("ERROR: received NAK trying to get ProductData information");
+                logger.ErrorFormat("received NAK trying to get ProductData information");
                 identity = null;
                 return false;
             }
@@ -376,7 +336,7 @@ namespace Insteon.Network
             {
                 if (properties == null)
                 {
-                    Log.WriteLine("ERROR: Device Id {0} has null properties object", Address.ToString());
+                    logger.ErrorFormat("Device Id {0} has null properties object", Address.ToString());
                     identity = null;
                     return false;
                 }
@@ -385,7 +345,7 @@ namespace Insteon.Network
                 return true;
             }
 
-            Log.WriteLine("ERROR: received unknown status trying to get productdata information");
+            logger.ErrorFormat("received unknown status trying to get productdata information");
             identity = null;
             return false; // echo was not ACK or NAK
         }
@@ -394,7 +354,7 @@ namespace Insteon.Network
         {
             var cmd = (byte)command;
             byte[] message = { (byte)InsteonModemSerialCommand.SendAllLinkCommand, group, cmd, value };
-            Log.WriteLine("Controller {0} GroupCommand(command:{1}, group:{2:X2}, value:{3:X2})", Address.ToString(), command.ToString(), group, value);
+            logger.DebugFormat("Controller {0} GroupCommand(command:{1}, group:{2:X2}, value:{3:X2})", Address.ToString(), command.ToString(), group, value);
             return message;
         }
 

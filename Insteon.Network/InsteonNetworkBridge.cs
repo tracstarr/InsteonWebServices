@@ -7,6 +7,7 @@ using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
 using Insteon.Network.Message;
 using Insteon.Network.Serial;
+using ServiceStack.Logging;
 
 namespace Insteon.Network
 {
@@ -20,6 +21,7 @@ namespace Insteon.Network
     //  - Verifying the message integrity by checking the trailer byte for ACK (06) or NAK (15), and informing the messenger of the result.
     internal class InsteonNetworkBridge : IDisposable
     {
+        private ILog logger = LogManager.GetLogger(typeof(InsteonNetworkBridge));
         private readonly List<byte> buffer = new List<byte>(); // buffer of received data to be processed
         private readonly IMessageProcessor messageProcessor; // reference to creator that handles processing of raw binary data into higher level messages
         private ISerialPort port; // serial port connection to the INSTEON controller
@@ -71,7 +73,7 @@ namespace Insteon.Network
             {
                 for (int i = 1; i <= Constants.negotiateRetries; ++i)
                 {
-                    Log.WriteLine("TX: {0}", Utilities.ByteArrayToString(input));
+                    logger.DebugFormat("TX: {0}", Utilities.ByteArrayToString(input));
                     port.Write(input);
 
                     port.Wait(Constants.openTimeout);
@@ -92,7 +94,7 @@ namespace Insteon.Network
                         response.AddRange(output);
                     }
 
-                    Log.WriteLine("RX: {0}", Utilities.ByteArrayToString(response.ToArray()));
+                    logger.DebugFormat("RX: {0}", Utilities.ByteArrayToString(response.ToArray()));
 
                     int offset = 0;
 
@@ -133,7 +135,7 @@ namespace Insteon.Network
                 }
             }
 
-            Log.WriteLine("Successfully negotiated with INSTEON controller on connection '{0}'...", connection);
+            logger.DebugFormat("Successfully negotiated with INSTEON controller on connection '{0}'...", connection);
             port.SetNotify(DataAvailable);
             return properties;
         }
@@ -153,7 +155,7 @@ namespace Insteon.Network
             var data = ReadData(0, false);
             if (data.Length > 0)
             {
-                Log.WriteLine("RX: {0}", Utilities.ByteArrayToString(data));
+                logger.DebugFormat("RX: {0}", Utilities.ByteArrayToString(data));
             }
 
             lock (buffer)
@@ -177,7 +179,7 @@ namespace Insteon.Network
                     {
                         if (last != offset - 1)
                         {
-                            Log.WriteLine("WARNING: Skipping {0} bytes to '{1}', discarded '{2}'", offset - last, Utilities.ByteArrayToString(data, offset - 1), Utilities.ByteArrayToString(data, 0, offset - 1));
+                            logger.WarnFormat("Skipping {0} bytes to '{1}', discarded '{2}'", offset - last, Utilities.ByteArrayToString(data, offset - 1), Utilities.ByteArrayToString(data, 0, offset - 1));
                         }
 
                         // loop until message successfully processed or until there is no more data available on the serial port...
@@ -192,21 +194,21 @@ namespace Insteon.Network
                             var appendData = ReadData(1, false); // try to read at least one more byte, waits up to Constants.readTime milliseconds
                             if (appendData.Length == 0)
                             {
-                                Log.WriteLine("WARNING: Could not process data '{0}'", Utilities.ByteArrayToString(data));
+                                logger.WarnFormat("Could not process data '{0}'", Utilities.ByteArrayToString(data));
                                 break; // break out of the loop when there is no more data available on the serial port
                             }
 
                             var list = new List<byte>(data);
                             list.AddRange(appendData);
                             data = list.ToArray();
-                            Log.WriteLine("RX: {0} (appended)", Utilities.ByteArrayToString(data));
+                            logger.DebugFormat("RX: {0} (appended)", Utilities.ByteArrayToString(data));
                         }
                     }
                 }
 
                 if (last != offset)
                 {
-                    Log.WriteLine("WARNING: Discarding {0} bytes '{1}'", offset - last, Utilities.ByteArrayToString(data, last));
+                    logger.WarnFormat("Discarding {0} bytes '{1}'", offset - last, Utilities.ByteArrayToString(data, last));
                 }
             }
         }
@@ -221,14 +223,14 @@ namespace Insteon.Network
             var data = ReadData(echoLength, true);
             if (data.Length == 0)
             {
-                Log.WriteLine("ERROR: No data read from port");
+                logger.ErrorFormat("No data read from port");
                 return EchoStatus.None;
             }
 
             // if the first byte is a NAK (15) then return a NAK and add whatever additional data was read to the buffer
             if (data[0] == (byte)EchoStatus.NAK)
             {
-                Log.WriteLine("RX: {0}", Utilities.ByteArrayToString(data));
+                logger.DebugFormat("RX: {0}", Utilities.ByteArrayToString(data));
                 if (data.Length > 1)
                 {
                     int remainingCount = data.Length - 1;
@@ -254,16 +256,16 @@ namespace Insteon.Network
             // exit if no MESSAGE START byte detected
             if (offset >= data.Length)
             {
-                Log.WriteLine("RX: {0} ERROR - Failed to find MESSAGE START byte (02)", Utilities.ByteArrayToString(data));
+                logger.DebugFormat("RX: {0} ERROR - Failed to find MESSAGE START byte (02)", Utilities.ByteArrayToString(data));
                 return EchoStatus.Unknown;
             }
 
-            Log.WriteLine("RX: {0}", Utilities.ByteArrayToString(data));
+            logger.DebugFormat("RX: {0}", Utilities.ByteArrayToString(data));
 
             // warn about any skipped bytes
             if (offset > 1)
             {
-                Log.WriteLine("WARNING: Skipping {0} bytes to '{1}', discarded '{2}'", offset - 1, Utilities.ByteArrayToString(data, offset - 1), Utilities.ByteArrayToString(data, 0, offset - 1));
+                logger.WarnFormat("Skipping {0} bytes to '{1}', discarded '{2}'", offset - 1, Utilities.ByteArrayToString(data, offset - 1), Utilities.ByteArrayToString(data, 0, offset - 1));
             }
 
             // process the echo and decode the trailing status byte
@@ -285,20 +287,20 @@ namespace Insteon.Network
                 if (result == (byte)EchoStatus.ACK)
                 {
                     messageProcessor.SetEchoStatus(EchoStatus.ACK);
-                    Log.WriteLine("PLM: {0} ACK", Utilities.ByteArrayToString(data, offset - 1, count + 2)); // +1 for MESSAGE START byte (02), +1 for ACK byte (06)
+                    logger.DebugFormat("PLM: {0} ACK", Utilities.ByteArrayToString(data, offset - 1, count + 2)); // +1 for MESSAGE START byte (02), +1 for ACK byte (06)
                     return EchoStatus.ACK;
                 }
                 if (result == (byte)EchoStatus.NAK)
                 {
-                    Log.WriteLine("PLM: {0} NAK", Utilities.ByteArrayToString(data, offset - 1, count + 2)); // +1 for MESSAGE START byte (02), +1 for NAK byte (15)
+                    logger.DebugFormat("PLM: {0} NAK", Utilities.ByteArrayToString(data, offset - 1, count + 2)); // +1 for MESSAGE START byte (02), +1 for NAK byte (15)
                     messageProcessor.SetEchoStatus(EchoStatus.NAK);
                     return EchoStatus.NAK;
                 }
-                Log.WriteLine("PLM: {0} Unknown trailing byte", Utilities.ByteArrayToString(data, offset - 1, count + 2)); // +1 for MESSAGE START byte (02), +1 for unknown byte
+                logger.DebugFormat("PLM: {0} Unknown trailing byte", Utilities.ByteArrayToString(data, offset - 1, count + 2)); // +1 for MESSAGE START byte (02), +1 for unknown byte
                 messageProcessor.SetEchoStatus(EchoStatus.Unknown);
                 return EchoStatus.Unknown;
             }
-            Log.WriteLine("PLM: {0} Echo mismatch", Utilities.ByteArrayToString(data, offset - 1));
+            logger.DebugFormat("PLM: {0} Echo mismatch", Utilities.ByteArrayToString(data, offset - 1));
             return EchoStatus.Unknown;
         }
 
@@ -345,11 +347,11 @@ namespace Insteon.Network
                 {
                     if (list.Count > 0)
                     {
-                        Log.WriteLine("WARNING: Could not read the expected number of bytes from the serial port; BytesRead='{0}', Expected={1}, Received={2}, Timeout={3}ms", Utilities.ByteArrayToString(list.ToArray()), expectedBytes, list.Count, Constants.readDataTimeout);
+                        logger.WarnFormat("Could not read the expected number of bytes from the serial port; BytesRead='{0}', Expected={1}, Received={2}, Timeout={3}ms", Utilities.ByteArrayToString(list.ToArray()), expectedBytes, list.Count, Constants.readDataTimeout);
                     }
                     else
                     {
-                        Log.WriteLine("WARNING: Could not read the expected number of bytes from the serial port; Expected={0}, Received=0, Timeout={1}ms", expectedBytes, Constants.readDataTimeout);
+                        logger.WarnFormat("Could not read the expected number of bytes from the serial port; Expected={0}, Received=0, Timeout={1}ms", expectedBytes, Constants.readDataTimeout);
                     }
                 }
             }
@@ -379,12 +381,12 @@ namespace Insteon.Network
                 {
                     if (retry <= 0)
                     {
-                        Log.WriteLine("TX: {0}", Utilities.ByteArrayToString(input));
+                        logger.DebugFormat("TX: {0}", Utilities.ByteArrayToString(input));
                     }
                     else
                     {
                         Thread.Sleep(retry * Constants.sendMessageWaitTime);
-                        Log.WriteLine("TX: {0} - RETRY {1} of {2}", Utilities.ByteArrayToString(input), retry, Constants.sendMessageRetries);
+                        logger.DebugFormat("TX: {0} - RETRY {1} of {2}", Utilities.ByteArrayToString(input), retry, Constants.sendMessageRetries);
                     }
                     port.Write(input);
                     status = ProcessEcho(echoLength + 2); // +1 for leading 02 byte, +1 for trailing ACK/NAK byte
@@ -398,7 +400,7 @@ namespace Insteon.Network
                     }
                 }
 
-                Log.WriteLine("Send failed after {0} retries", Constants.sendMessageRetries);
+                logger.DebugFormat("Send failed after {0} retries", Constants.sendMessageRetries);
                 return status;
             }
             finally

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Insteon.Daemon.Common.Service;
 using Insteon.Network;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
@@ -64,9 +63,9 @@ namespace Insteon.Daemon.Common
 
         private void RefreshDeviceDatabase()
         {
-            var links = Network.Controller.GetLinks();
+            var links = Network.Controller.GetLinks().Where(l => l.RecordType == InsteonDeviceLinkRecordType.Responder);
 
-            foreach (var insteonDeviceLinkRecord in links.Where(l => l.RecordType != InsteonDeviceLinkRecordType.Empty))
+            foreach (var insteonDeviceLinkRecord in links)
             {
                 if (Network.Devices.ContainsKey(insteonDeviceLinkRecord.Address))
                     continue;
