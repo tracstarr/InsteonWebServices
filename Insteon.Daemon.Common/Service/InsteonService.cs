@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Insteon.Daemon.Common.Request;
 using Insteon.Daemon.Common.Response;
@@ -14,20 +15,41 @@ namespace Insteon.Daemon.Common.Service
     {
         private readonly InsteonManager manager;
         private readonly SmartThingsSettings settings;
-        
+
         public InsteonService(InsteonManager manager, SmartThingsSettings settings)
         {
             this.manager = manager;
             this.settings = settings;
         }
-        
+
+        public ResponseStatus Any(ConnectToInsteonNetworkRequest request)
+        {
+            if (manager.Network.IsConnected)
+                return new ResponseStatus("100", "Already connected");
+
+            try
+            {
+                var connected = manager.Connect();
+                if (!connected)
+                {
+                    return new ResponseStatus("101", "Cannot connect to Insteon Controller.");
+                }
+            }
+            catch (Exception exception)
+            {
+                return new ResponseStatus("102", exception.Message);
+            }
+            
+            return new ResponseStatus();
+        }
+
         public GetDevicesResponse Any(GetDevices request)
         {
             var result = new GetDevicesResponse() { Devices = new List<DeviceInfo>() };
 
             foreach (InsteonDevice device in manager.Network.Devices)
             {
-                result.Devices.Add(new DeviceInfo(){Address = device.Address.ToString(), Category = device.Identity.GetDeviceCategoryName()});
+                result.Devices.Add(new DeviceInfo() { Address = device.Address.ToString(), Category = device.Identity.GetDeviceCategoryName() });
             }
 
             return result;

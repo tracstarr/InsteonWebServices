@@ -54,6 +54,9 @@
     <Reference Include="ServiceStack.OrmLite.SqlServer">
       <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.71\lib\net35\ServiceStack.OrmLite.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Razor">
+      <HintPath>..\packages\ServiceStack.Razor.3.9.71\lib\net40\ServiceStack.Razor.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Redis">
       <HintPath>..\packages\ServiceStack.Redis.3.9.71\lib\net35\ServiceStack.Redis.dll</HintPath>
     </Reference>
@@ -70,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Request\ConnectToInsteonNetworkRequest.cs" />
     <Compile Include="Request\DimmableLightingRequest.cs" />
     <Compile Include="Request\EnterLinkModeRequest.cs" />
     <Compile Include="Request\GetDevices.cs" />

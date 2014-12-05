@@ -190,3 +190,4 @@ ModelManifest.xml
 /Insteon.Daemon.Common/Visual Studio 2013/Visualizers
 *.userprefs
 /Insteon.Network/Visual Studio 2013/Visualizers
+/Insteon.WinService/Visual Studio 2013/Visualizers

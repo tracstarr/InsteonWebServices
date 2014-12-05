@@ -1,6 +1,6 @@
-﻿using System;
-using Insteon.Daemon.Common.Service;
+﻿using Insteon.Daemon.Common.Service;
 using Insteon.Network;
+using ServiceStack.Razor;
 using ServiceStack.WebHost.Endpoints;
 
 namespace Insteon.Daemon.Common
@@ -18,23 +18,20 @@ namespace Insteon.Daemon.Common
 
 	    public override void Configure(Funq.Container container)
 		{
-            // will throw if cannot make connection
+            Plugins.Add(new RazorFormat());
             var manager = new InsteonManager(insteonSource);
             container.Register(manager);
 	        container.Register(new SmartThingsSettings());
+
+            //SetConfig(new EndpointHostConfig()
+            //{
+            //    CustomHttpHandlers ={ { System.Net.HttpStatusCode.NotFound, new RazorHandler("/notfound")}}
+            //});
 		}
 
 	    public override void Start(string urlBase)
 	    {
-	        var manager = Container.Resolve<InsteonManager>();
-	        var connected = manager.Connect();
-
-	        if (!connected)
-	        {
-	            throw new Exception("Could not connect to Insteon Controller");
-	        }
-            
-	        base.Start(urlBase);
+	       base.Start(urlBase);
 	    }
 
 	    public override void Stop()
