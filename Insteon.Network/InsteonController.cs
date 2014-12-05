@@ -286,7 +286,7 @@ namespace Insteon.Network
         {
             Dictionary<PropertyKey, int> properties;
 
-            logger.DebugFormat("Controller {0} GetLinkIdentity", Address.ToString());
+            logger.DebugFormat("Device {0} GetLinkIdentity", Address.ToString());
             byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, link.Address[2], link.Address[1], link.Address[0], 
                                  (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, (byte)InsteonDirectCommands.IDRequest, Byte.MinValue };
 

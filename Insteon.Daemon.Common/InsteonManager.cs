@@ -63,7 +63,7 @@ namespace Insteon.Daemon.Common
 
         private void RefreshDeviceDatabase()
         {
-            var links = Network.Controller.GetLinks().Where(l => l.RecordType == InsteonDeviceLinkRecordType.Responder);
+            var links = Network.Controller.GetLinks();
 
             foreach (var insteonDeviceLinkRecord in links)
             {
