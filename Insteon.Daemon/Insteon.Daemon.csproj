@@ -51,6 +51,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="insteon.config" />
+    <None Include="xinitrc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Insteon.Daemon.Common\Insteon.Daemon.Common.csproj">

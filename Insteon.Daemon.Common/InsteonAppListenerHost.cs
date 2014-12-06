@@ -23,10 +23,10 @@ namespace Insteon.Daemon.Common
             container.Register(manager);
 	        container.Register(new SmartThingsSettings());
 
-            //SetConfig(new EndpointHostConfig()
-            //{
-            //    CustomHttpHandlers ={ { System.Net.HttpStatusCode.NotFound, new RazorHandler("/notfound")}}
-            //});
+            SetConfig(new EndpointHostConfig()
+            {
+                CustomHttpHandlers ={ { System.Net.HttpStatusCode.NotFound, new RazorHandler("/notfound")}}
+            });
 		}
 
 	    public override void Start(string urlBase)
