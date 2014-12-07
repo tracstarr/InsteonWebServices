@@ -22,7 +22,7 @@ namespace Insteon.Daemon.Common.Service
             this.settings = settings;
         }
 
-        public ResponseStatus Any(ConnectToInsteonNetworkRequest request)
+        public ResponseStatus Get(ConnectToInsteonNetworkRequest request)
         {
             if (manager.Network.IsConnected)
                 return new ResponseStatus("100", "Already connected");
@@ -43,7 +43,7 @@ namespace Insteon.Daemon.Common.Service
             return new ResponseStatus();
         }
 
-        public GetDevicesResponse Any(GetDevices request)
+        public GetDevicesResponse Get(GetDevices request)
         {
             var result = new GetDevicesResponse() { Devices = new List<DeviceInfo>() };
 
@@ -55,7 +55,7 @@ namespace Insteon.Daemon.Common.Service
             return result;
         }
 
-        public object Any(GetStatus request)
+        public object Get(GetStatus request)
         {
             return new
             {
@@ -68,7 +68,7 @@ namespace Insteon.Daemon.Common.Service
 
         }
 
-        public ResponseStatus Any(SmartThingsSettingsRequest request)
+        public ResponseStatus Put(SmartThingsSettingsRequest request)
         {
             // always reset values
             settings.AccessToken = request.AccessToken;
@@ -80,7 +80,7 @@ namespace Insteon.Daemon.Common.Service
             return !cb.Authorization() ? new ResponseStatus("404", "Couldn't connect to ST hub") : new ResponseStatus();
         }
 
-        public ResponseStatus Any(SmartThingsSettingsResetRequest request)
+        public ResponseStatus Get(SmartThingsSettingsResetRequest request)
         {
             settings.AccessToken = null;
             settings.Location = null;
@@ -91,7 +91,7 @@ namespace Insteon.Daemon.Common.Service
             return !cb.AuthorizationRevoke() ? new ResponseStatus("404", "Couldn't connect to ST hub") : new ResponseStatus();
         }
 
-        public ResponseStatus Any(EnterLinkModeRequest request)
+        public ResponseStatus Get(EnterLinkModeRequest request)
         {
             if (request.Start && manager.Network.Controller.IsInLinkingMode)
             {

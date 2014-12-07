@@ -18,7 +18,7 @@ namespace Insteon.Daemon.Common.Service
         }
 
 
-        public ResponseStatus Any(SwitchedLightingRequest request)
+        public ResponseStatus Put(SwitchedLightingRequest request)
         {
             InsteonAddress address;
             if (InsteonAddress.TryParse(request.DeviceId, out address))

@@ -1,6 +1,10 @@
-﻿using Insteon.Daemon.Common.Service;
+﻿using System.Linq;
+using Insteon.Daemon.Common.Service;
 using Insteon.Network;
+using ServiceStack;
+using ServiceStack.Api.Swagger;
 using ServiceStack.Razor;
+using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints;
 
 namespace Insteon.Daemon.Common
@@ -14,19 +18,18 @@ namespace Insteon.Daemon.Common
 			: base("Insteon HttpListener", typeof(InsteonService).Assembly)
 		{
 		    this.insteonSource = insteonSource;
-		}
+        }
 
 	    public override void Configure(Funq.Container container)
 		{
-            Plugins.Add(new RazorFormat());
+            Plugins.RemoveAll(x => x is MetadataFeature); 
+            //Plugins.Add(new RazorFormat());
+	        JsConfig.EmitCamelCaseNames = true;
+            Plugins.Add(new SwaggerFeature());
             var manager = new InsteonManager(insteonSource);
             container.Register(manager);
 	        container.Register(new SmartThingsSettings());
-
-            SetConfig(new EndpointHostConfig()
-            {
-                CustomHttpHandlers ={ { System.Net.HttpStatusCode.NotFound, new RazorHandler("/notfound")}}
-            });
+            
 		}
 
 	    public override void Start(string urlBase)
