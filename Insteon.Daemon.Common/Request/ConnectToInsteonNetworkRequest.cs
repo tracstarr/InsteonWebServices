@@ -1,10 +1,8 @@
-﻿using System.ComponentModel;
-using ServiceStack.ServiceHost;
+﻿using ServiceStack.ServiceHost;
 
 namespace Insteon.Daemon.Common.Request
 {
-    [Description("Connect to the insteon network")]
-    [Route("/connect")]
+    [Route("/connect", "GET", Summary = "Connect to the insteon network")]
     public class ConnectToInsteonNetworkRequest
     {
     }

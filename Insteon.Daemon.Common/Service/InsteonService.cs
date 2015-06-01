@@ -77,7 +77,7 @@ namespace Insteon.Daemon.Common.Service
 
             var cb = new SmartThingsCallbacks(settings);
 
-            return !cb.Authorization() ? new ResponseStatus("404", "Couldn't connect to ST hub") : new ResponseStatus();
+            return !cb.Authorization() ? new InsteonServiceResponse("404", "Couldn't connect to ST hub") : new InsteonServiceResponse();
         }
 
         public ResponseStatus Get(SmartThingsSettingsResetRequest request)
@@ -91,7 +91,7 @@ namespace Insteon.Daemon.Common.Service
             return !cb.AuthorizationRevoke() ? new ResponseStatus("404", "Couldn't connect to ST hub") : new ResponseStatus();
         }
 
-        public ResponseStatus Get(EnterLinkModeRequest request)
+        public ResponseStatus Put(EnterLinkModeRequest request)
         {
             if (request.Start && manager.Network.Controller.IsInLinkingMode)
             {

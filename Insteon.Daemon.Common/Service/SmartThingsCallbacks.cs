@@ -20,7 +20,7 @@ namespace Insteon.Daemon.Common.Service
 
         public bool Authorization()
         {
-            string path = string.Format("{0}authReply", rootPath);
+            string path = string.Format("{0}link", rootPath);
             var request = new RestRequest(path, Method.GET) {RequestFormat = DataFormat.Json};
             request.AddQueryParameter("access_token", settings.AccessToken);
             

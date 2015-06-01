@@ -161,7 +161,7 @@ ol li {
 }
 
 .markdown h3 {
-    color: #547f00;
+    color: #0f6ab4;
 }
 
 .markdown h4 {
@@ -219,7 +219,7 @@ span.blank, span.empty {
 }
 
 a {
-    color: #547f00;
+    color: #0f6ab4;
 }
 
 b, strong {
@@ -400,7 +400,7 @@ body #content_message {
 }
 
 body #header {
-    background-color: #89bf04;
+    background-color: #00bfff;
     padding: 14px;
 }
 
@@ -447,7 +447,7 @@ body #header form#api_selector .input a#explore {
     padding: 6px 8px;
     font-size: 0.9em;
     color: white;
-    background-color: #547f00;
+    background-color: #0f6ab4;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     -o-border-radius: 4px;
@@ -457,7 +457,7 @@ body #header form#api_selector .input a#explore {
 }
 
 body #header form#api_selector .input a#explore:hover {
-    background-color: #547f00;
+    background-color: #0f6ab4;
 }
 
 body p#colophon {
@@ -472,7 +472,7 @@ body p#colophon {
 
 body p#colophon a {
     text-decoration: none;
-    color: #547f00;
+    color: #0f6ab4;
 }
 
 body ul#resources {
@@ -1751,7 +1751,7 @@ pre code {
 }
 
 .message-success {
-  color: #89BF04;
+  color: #00bfff;
 }
 
 .message-fail {
