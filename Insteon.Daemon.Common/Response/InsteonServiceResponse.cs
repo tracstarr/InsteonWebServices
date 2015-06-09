@@ -1,4 +1,5 @@
-﻿using ResponseStatus = ServiceStack.ServiceInterface.ServiceModel.ResponseStatus;
+﻿
+using ServiceStack;
 
 namespace Insteon.Daemon.Common.Response
 {

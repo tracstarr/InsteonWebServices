@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Insteon.Network.Commands;
 using Insteon.Network.Device;
 

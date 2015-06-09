@@ -1,11 +1,9 @@
-﻿using System.Linq;
+﻿using Funq;
 using Insteon.Daemon.Common.Service;
 using Insteon.Network;
 using ServiceStack;
 using ServiceStack.Api.Swagger;
-using ServiceStack.Razor;
 using ServiceStack.Text;
-using ServiceStack.WebHost.Endpoints;
 
 namespace Insteon.Daemon.Common
 {
@@ -20,7 +18,7 @@ namespace Insteon.Daemon.Common
 		    this.insteonSource = insteonSource;
         }
 
-	    public override void Configure(Funq.Container container)
+	    public override void Configure(Container container)
 		{
             Plugins.RemoveAll(x => x is MetadataFeature); 
             //Plugins.Add(new RazorFormat());
@@ -31,11 +29,6 @@ namespace Insteon.Daemon.Common
 	        container.Register(new SmartThingsSettings());
             
 		}
-
-	    public override void Start(string urlBase)
-	    {
-	       base.Start(urlBase);
-	    }
 
 	    public override void Stop()
 	    {

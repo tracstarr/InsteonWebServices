@@ -1,8 +1,7 @@
 ﻿using Insteon.Daemon.Common.Request;
 using Insteon.Network.Device;
 using Insteon.Network.Devices;
-using ServiceStack.ServiceHost;
-using ServiceStack.ServiceInterface.ServiceModel;
+using ServiceStack;
 
 namespace Insteon.Daemon.Common.Service
 {

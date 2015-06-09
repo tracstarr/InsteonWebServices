@@ -1,4 +1,4 @@
-using ServiceStack.ServiceHost;
+using ServiceStack;
 
 namespace Insteon.Daemon.Common.Request
 {

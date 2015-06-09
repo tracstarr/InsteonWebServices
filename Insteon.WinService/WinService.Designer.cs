@@ -1,11 +1,13 @@
-﻿namespace Insteon.WinService
+﻿using System.ComponentModel;
+
+namespace Insteon.WinService
 {
 	partial class WinService
 	{
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.

@@ -5,8 +5,7 @@ using Insteon.Daemon.Common.Response;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
-using ServiceStack.ServiceHost;
-using ServiceStack.ServiceInterface.ServiceModel;
+using ServiceStack;
 
 namespace Insteon.Daemon.Common.Service
 {

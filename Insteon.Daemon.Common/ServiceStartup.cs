@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Configuration;
+using ServiceStack;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
-using ServiceStack.WebHost.Endpoints;
 
 namespace Insteon.Daemon.Common
 {
@@ -30,7 +29,6 @@ namespace Insteon.Daemon.Common
                 appHost = new InsteonAppListenerHost(insteonConnection);
 
                 appHost.Init();
-                appHost.Start(ListeningOn);
                 logger.InfoFormat("Listening On: {0}", ListeningOn);
             }
             catch (Exception ex)

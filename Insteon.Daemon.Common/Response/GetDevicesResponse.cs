@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using ServiceStack.ServiceInterface.ServiceModel;
+using ServiceStack;
 
 namespace Insteon.Daemon.Common.Response
 {

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using Insteon.Network;
 using Insteon.Network.Device;
-using Insteon.Network.Enum;
 using ServiceStack.Logging;
 
 namespace Insteon.Daemon.Common

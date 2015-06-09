@@ -2,7 +2,6 @@
 using System.Threading;
 using Insteon.Daemon.Common;
 
-
 namespace Insteon.WinService
 {
     static class Program

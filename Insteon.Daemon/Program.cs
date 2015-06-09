@@ -1,6 +1,6 @@
-﻿using Mono.Unix;
+﻿using Insteon.Daemon.Common;
+using Mono.Unix;
 using Mono.Unix.Native;
-using Insteon.Daemon.Common;
 
 namespace Insteon.Daemon
 {
