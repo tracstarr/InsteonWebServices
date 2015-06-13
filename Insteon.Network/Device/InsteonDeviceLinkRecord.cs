@@ -69,14 +69,24 @@ namespace Insteon.Network.Device
         {
             get
             {
+                // Bit7 (1) Record in use, (0) record is available. This will always be 1 (docs)
                 if ((LinkRecordFlags & 0x80) == 0)
                 {
                     return InsteonDeviceLinkRecordType.Empty;
                 }
-                if ((LinkRecordFlags & 0x40) != 0)
+
+                //TODO: if I compare to HouseLinc, they show opposite lists that actually make sense. I've switched R vs C here
+
+                // Bit 6 (0) Responder (slave)
+                // Bit 6 (1) Controller
+                // SWITCHED ^^^ which is what documentation shows?
+
+                if ((LinkRecordFlags & 0x40) == 0)
                 {
                     return InsteonDeviceLinkRecordType.Controller;
                 }
+
+                
                 return InsteonDeviceLinkRecordType.Responder;
             }
         }

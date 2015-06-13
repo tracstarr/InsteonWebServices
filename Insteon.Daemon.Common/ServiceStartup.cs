@@ -29,6 +29,7 @@ namespace Insteon.Daemon.Common
                 appHost = new InsteonAppListenerHost(insteonConnection);
 
                 appHost.Init();
+                appHost.Start(ListeningOn);
                 logger.InfoFormat("Listening On: {0}", ListeningOn);
             }
             catch (Exception ex)

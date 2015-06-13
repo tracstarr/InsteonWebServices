@@ -20,7 +20,7 @@ namespace Insteon.Daemon.Common
 
 	    public override void Configure(Container container)
 		{
-            Plugins.RemoveAll(x => x is MetadataFeature); 
+            //Plugins.RemoveAll(x => x is MetadataFeature); 
             //Plugins.Add(new RazorFormat());
 	        JsConfig.EmitCamelCaseNames = true;
             Plugins.Add(new SwaggerFeature());

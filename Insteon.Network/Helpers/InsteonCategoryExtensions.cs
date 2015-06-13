@@ -58,7 +58,9 @@ namespace Insteon.Network.Helpers
                         {0x0A, "Balboa Instrument's Poolux LCD Controller"},
                         {0x0B, "Access Point [2443]"},
                         {0x0C, "IES Color Touchscreen"},
-                        {0x0D, "SmartLabs KeyFOB"}
+                        {0x0D, "SmartLabs KeyFOB"},
+                        {0x11, "Mini Remote - Switch [2444A3]"},
+                        {0x12, "Mini Remote - 8 Scene [2444A2WH8]"},
                     } },
                 { 0x01, new Dictionary<byte,string>() 
                     { 
@@ -105,7 +107,9 @@ namespace Insteon.Network.Helpers
                         {0x12, "Icon SL Relay Inline Companion"},
                         {0x13, "ICON SwitchLinc Relay for Lixar/Bell Canada [2676R-B]"},
                         {0x14, "In-LineLinc Relay with Sense [2475S2]"},
-                        {0x16, "SwitchLinc Relay with Sense [2476S2]"}
+                        {0x16, "SwitchLinc Relay with Sense [2476S2]"},
+                        {0x2A, "SwitchLinc Relay [2477S]"},
+                        {0x38, "On/Off Outdoor Module [2634-222]"},
                     } },
                 { 0x03, new Dictionary<byte,string>() 
                     { 

@@ -55,7 +55,7 @@ namespace Insteon.Network
         /// </summary>
         public bool IsConnected
         {
-            get { return Connection != null; }
+            get { return Connection != null && Controller != null && !Controller.Address.IsEmpty; }
         }
 
         /// <summary>
@@ -210,6 +210,11 @@ namespace Insteon.Network
 
         private void OnConnected()
         {
+            if (Connection.Address.IsEmpty)
+            {
+                Connection.Address = Controller.Address;
+            }
+
             if (Connected != null)
             {
                 Connected(this, EventArgs.Empty);
@@ -254,18 +259,18 @@ namespace Insteon.Network
         /// </remarks>
         public bool TryConnect()
         {
-            var connections = GetAvailableConnections(true);
-            if (LastConnectStatus.Cancel || connections == null || connections.Length <= 0)
+            var availableConnections = GetAvailableConnections(true);
+            if (LastConnectStatus.Cancel || availableConnections == null || availableConnections.Length <= 0)
             {
                 return false;
             }
 
-            foreach (InsteonConnection connection in connections)
+            foreach (InsteonConnection connection in availableConnections)
             {
                 logger.DebugFormat("Available connection '{0}'", connection.ToString());
             }
 
-            return TryConnect(connections);
+            return TryConnect(availableConnections);
         }
 
         /// <summary>

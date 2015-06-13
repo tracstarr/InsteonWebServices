@@ -49,7 +49,7 @@ namespace Insteon.Network
         /// <summary>
         /// The INSTEON address of the controller device.
         /// </summary>
-        public InsteonAddress Address { get; private set; }
+        public InsteonAddress Address { get; internal set; }
 
         /// <summary>
         /// The display name for the connection.

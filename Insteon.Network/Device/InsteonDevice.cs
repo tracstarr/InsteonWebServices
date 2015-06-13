@@ -15,7 +15,7 @@ namespace Insteon.Network.Device
     /// </summary>
     public class InsteonDevice
     {
-        private ILog logger = LogManager.GetLogger(typeof(InsteonDevice));
+        private readonly ILog logger = LogManager.GetLogger(typeof(InsteonDevice));
         private readonly Timer ackTimer; // timeout to receive ACK from device
         private readonly InsteonNetwork network;
         private readonly AutoResetEvent pendingEvent = new AutoResetEvent(false);
@@ -27,10 +27,21 @@ namespace Insteon.Network.Device
 
         internal InsteonDevice(InsteonNetwork network, InsteonAddress address, InsteonIdentity identity)
         {
+            DisplayName = DeviceName;
             this.network = network;
             Address = address;
             Identity = identity;
             ackTimer = new Timer(PendingCommandTimerCallback, null, Timeout.Infinite, Constants.deviceAckTimeout);
+        }
+
+        public string DisplayName { get; set; }
+
+        public string DeviceName
+        {
+            get
+            {
+                return Identity.GetSubCategoryName();
+            }
         }
 
         /// <summary>
