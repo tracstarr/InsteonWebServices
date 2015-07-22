@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using Insteon.Network;
 using Insteon.Network.Device;
+using Insteon.Network.Enum;
 using ServiceStack.Logging;
 
 namespace Insteon.Daemon.Common
@@ -61,7 +63,7 @@ namespace Insteon.Daemon.Common
 
         private void RefreshDeviceDatabase()
         {
-            var links = Network.Controller.GetLinks();
+            var links = Network.Controller.GetLinks().Where(l => l.RecordType == InsteonDeviceLinkRecordType.Responder);
 
             foreach (var insteonDeviceLinkRecord in links)
             {
