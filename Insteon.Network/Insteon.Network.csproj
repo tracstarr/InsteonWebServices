@@ -53,6 +53,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Devices\GarageDoor.cs" />
     <Compile Include="Enum\InsteonModemConfigurationFlags.cs" />
     <Compile Include="Commands\InsteonModemSerialCommand.cs" />
     <Compile Include="Devices\SwitchedLighting.cs" />
