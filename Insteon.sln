@@ -25,6 +25,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SmartThings", "SmartThings", "{12387217-8CED-4213-AE4F-D13E694F6A58}"
 	ProjectSection(SolutionItems) = preProject
 		SmartThings\InsteonConnectApp.groovy = SmartThings\InsteonConnectApp.groovy
+		SmartThings\InsteonDimmableSwitchDeviceType.groovy = SmartThings\InsteonDimmableSwitchDeviceType.groovy
+		SmartThings\InsteonSwitchDeviceType.groovy = SmartThings\InsteonSwitchDeviceType.groovy
 	EndProjectSection
 EndProject
 Global

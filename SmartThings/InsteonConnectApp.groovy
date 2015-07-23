@@ -57,7 +57,7 @@ mappings {
            GET: "revokeHandler",
        ]
    	}
-   	path("/device/:id/:status") {
+   	path("/device/:id/:status/:payload") {
        action: [
            PUT: "deviceHandler",
        ]
@@ -68,8 +68,7 @@ mappings {
 *	Pages
 */
 
-def mainPage()
-{	
+def mainPage(){	
 	return dynamicPage(name:"mainPage", title: "Insteon Connect", uninstall: state.isLinked, install: false) {
     			section() {
                 	href ("settingsPage", title: state.isLinked? "Server Settings":"Connect", description:"Insteon server settings.")
@@ -80,8 +79,7 @@ def mainPage()
                 	UpdateSelectedDevices()
                 
                 	section() {
-                		href ("deviceSelectPage", title: "Devices", description: "Select the devices you want to control.")
-                        href ("deviceConnectPage", title: "Discover Devices", description: "Add new devices to your insteon network to control here.")
+                		href ("deviceSelectPage", title: "Devices", description: "Select the devices you want to control.")                      
                     }
                 }
                 else
@@ -94,8 +92,7 @@ def mainPage()
 
 }
 
-def serverSettingsPage()
-{
+def serverSettingsPage(){
 	return dynamicPage(name:"settingsPage", title: "Insteon Connect Settings", uninstall:false, install:false){
     		section() {
             	paragraph "Please enter your Insteon Service Endpoint details."
@@ -120,17 +117,19 @@ def serverSettingsPage()
         }
 }
 
-
-def deviceSelectPage()
-{
+def deviceSelectPage(){
 	if (state.gotDevices)
     {
         def switchOptions = switchesDiscovered() ?: []
         def numSwitchesFound = switchOptions.size() ?: 0
+        
+        def dimmerOptions = dimmersDiscovered() ?: []
+        def numDimmersFound = dimmerOptions.size() ?: 0
      
      	return dynamicPage(name:"deviceSelectPage", title:"Device Selection", nextPage:"") {
 			section("Select your device below.") {
-        		input "selectedSwitches", "enum", required:false, title:"Select Switches (${numSwitchesFound} found)", multiple:true, options:switchOptions				
+        		input "selectedSwitches", "enum", required:false, title:"Select Switches (${numSwitchesFound} found)", multiple:true, options:switchOptions	
+                input "selectedDimmers", "enum", required:false, title:"Select Dimmers (${numDimmersFound} found)", multiple:true, options:dimmerOptions	
 			}		
 		}   
     }
@@ -140,15 +139,14 @@ def deviceSelectPage()
 		api("deviceList",null)	
     }
     
-	return dynamicPage(name:"deviceSelectPage", title:"Device Discovery Started!", nextPage:"", refreshInterval:3) {
+	return dynamicPage(name:"deviceSelectPage", title:"Device Discovery Started!", nextPage:"", refreshInterval:5) {
 		section() {
 				paragraph "Getting device lists..."
 			}	
 	}   
 }
 
-def serviceConnectPage()
-{
+def serviceConnectPage(){
 	TRACE("${state}")
 	if (!state.isLinked)
 	{    	
@@ -177,9 +175,7 @@ def serviceConnectPage()
     }
 }
 
-
-def resetDeviceListPage ()
-{
+def resetDeviceListPage (){
 	state.gotDevices = false
     state.waitOnRestCall = false
     state.switches = null
@@ -191,8 +187,7 @@ def resetDeviceListPage ()
 		}
 }
 
-def forceRefreshPage()
-{
+def forceRefreshPage(){
 	api("fullrefresh",null)
 	return dynamicPage(name:"forceRefreshPage", title:"Force Refresh") {
 			section() {
@@ -201,8 +196,7 @@ def forceRefreshPage()
 		}
 }
 
-def resetServerSettingsPage()
-{
+def resetServerSettingsPage(){
 	return dynamicPage(name:"resetServerSettingsPage", title:"Reset All") {
 			section() {
 				paragraph "Not Implemented..."
@@ -210,9 +204,7 @@ def resetServerSettingsPage()
 		}
 }
 
-
-def statusCheckPage()
-{   	
+def statusCheckPage(){   	
     if (!state.statusCheck)
     {
       api("status",null)
@@ -278,8 +270,7 @@ private removeChildDevices(delete) {
 *	REST Handlers
 */
 
-def linkHandler()
-{	
+def linkHandler(){	
     if (state.isLinked)
     {
     	return [result: "already connected"]
@@ -290,16 +281,14 @@ def linkHandler()
    	return [result  : "ok"]
 }
 
-def revokeHandler()
-{
+def revokeHandler(){
     INFO("Insteon service requested revoking access")
     state.isLinked = false
     state.waitOnRestCall = false
     return [result  : "ok"]
 }
 
-def deviceHandler()
-{
+def deviceHandler(){
 	updateDevice()
 }
 
@@ -308,71 +297,77 @@ def deviceHandler()
 */
 
 def lanHandler(evt) {
+	
 	def description = evt.description
     def hub = evt?.hubId
-
+	
 	def parsedEvent = parseEventMessage(description)
 	parsedEvent << ["hub":hub]
        
-    if (parsedEvent.body && parsedEvent.headers)
+    if (parsedEvent.headers)
     {
-    try
-    {
-    	def headerString = new String(parsedEvent.headers.decodeBase64())
-		def bodyString = new String(parsedEvent.body.decodeBase64())
-        
-        def body = new groovy.json.JsonSlurper().parseText(bodyString)
-        DEBUG(body)
-        
-        if (body?.errorCode)
-        {
-        	ERROR("[${body?.errorCode}] ${body?.message}")
-		}
-        else
-        {
-        	if (body?.action?.equalsIgnoreCase("status"))
-            {               	
-                state.isLinked = body?.isOk
+    	try
+        {	        	
+            def headerString = new String(parsedEvent.headers.decodeBase64())
+            DEBUG(headerString)
+            if (!headerString.contains("Insteon HttpListener"))
+            {
+                WARN("Not a message from Insteon Services. Ignoring")
+                return
             }
-            else if (body?.devices != null)
-            {           
-                body?.devices.each { 
-                	
-                    def d = null
-                    
-                	if (it?.category?.equalsIgnoreCase("Dimmable Lighting Control"))
-                    {    
-                    	DEBUG("not implemented")                     
-                    }
-                    else if (it?.category?.equalsIgnoreCase("Switched Lighting Control"))
-                    {       
-                     	d = getSwitches()                		
-                    }
-                    else if (it?.category?.equalsIgnoreCase("Sensors and Actuators"))
-                    {
-                    	DEBUG("not implemented")                                  		
-                    }
-                    else
-                    {
-                    	DEBUG("Ignoring current device type. " + it?.category)
-                    }
-                                	
-                	if (d != null)
-                    {
-                    	DEBUG("Adding to device list")
-                        def dname = it?.name ?: it?.address
-                    	d[it?.address] = [id: it.address, name: dname, deviceType: it.category, hub: parsedEvent.hub]   
-                    }
-                }
-                
-                state.gotDevices = true
-            }             
             
-        }
+            def bodyString = new String(parsedEvent.body.decodeBase64())
+            def body = new groovy.json.JsonSlurper().parseText(bodyString)
+            
+            if (body?.errorCode)
+            {
+                ERROR("[${body?.errorCode}] ${body?.message}")
+            }
+            else
+            {
+                if (body?.action?.equalsIgnoreCase("status"))
+                {               	
+                    state.isLinked = body?.isOk
+                }
+                else if (body?.devices != null)
+                {           
+                    body?.devices.each { 
+
+                        def d = null
+
+                        if (it?.category?.equalsIgnoreCase("Dimmable Lighting Control"))
+                        {    
+                            d = getDimmers()                     
+                        }
+                        else if (it?.category?.equalsIgnoreCase("Switched Lighting Control"))
+                        {       
+                            d = getSwitches()                		
+                        }
+                        else if (it?.category?.equalsIgnoreCase("Sensors and Actuators"))
+                        {
+                            DEBUG("not implemented")                                  		
+                        }
+                        else
+                        {
+                            DEBUG("Ignoring current device type. " + it?.category)
+                        }
+
+                        if (d != null)
+                        {
+                            DEBUG("Adding to device list")
+                            def dname = it?.name ?: it?.address
+                            d[it?.address] = [id: it.address, name: dname, deviceType: it.category, hub: parsedEvent.hub]   
+                        }
+                    }
+
+                    state.gotDevices = true
+                }             
+
+            }
       	
         } catch(Exception e)
         {
-        	ERROR(e)
+        	ERROR("Error in landHandler:" + e)
         } finally
         {
         	state.waitOnRestCall = false   
@@ -450,13 +445,11 @@ private String convertPortToHex(port) {
     return hexport
 }
 
-def toJson(Map m)
-{
+def toJson(Map m){
 	return new org.codehaus.groovy.grails.web.json.JSONObject(m).toString()
 }
 
-def toQueryString(Map m)
-{
+def toQueryString(Map m) {
 	return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
 }
 
@@ -475,8 +468,11 @@ private def api(method, args) {
         'deviceList': 
 			[uri:"/devices", 
           		type: 'get'],
-        'set':
-        	[uri:"/set",
+        'setswitch':
+        	[uri:"/lighting/switched",
+            	type: 'put'],
+        'setdimmer':
+        	[uri:"/lighting/dimmable",
             	type: 'put'],
         'refreshDevice':
         	[uri:"/refresh/device?" + toQueryString(args),
@@ -528,15 +524,23 @@ private putapi(params, uri) {
 /************************************************************
 *	Functions
 */
-def setDeviceMode(insteonDevice, mode)
+def setSwitchState(insteonDevice, mode)
 {	
-	def pId = insteonDevice?.device?.deviceNetworkId[-1..-18]
-	def params = ["deviceId": "${pId}","Mode" : "${mode}"]
-    api("set", params)    
+	def pId = insteonDevice?.device?.deviceNetworkId
+    pId = pId.substring(pId.lastIndexOf("/") + 1)
+	def params = ["deviceId": "${pId}","State" : "${mode}"]
+    api("setswitch", params)    
 }
 
-def deleteChildren(selected, existing)
-{
+def setDimmerState(insteonDevice, state, level, fast)
+{	
+    def pId = insteonDevice?.device?.deviceNetworkId
+    pId = pId.substring(pId.lastIndexOf("/") + 1)	
+	def params = ["deviceId": "${pId}","State" : "${state}","Fast" : "${fast}", "Level" : "${level}"]
+    api("setdimmer", params)    
+}
+
+def deleteChildren(selected, existing){
 	// given all known devices, search the list of selected ones, if the device isn't selected, see if it exists as a device, if it does, remove it.
     existing.each { device ->
     	def dni = app.id + device.value.id
@@ -559,20 +563,19 @@ def deleteChildren(selected, existing)
     }
 }
 
-def DeleteChildDevicesNotSelected()
-{
+def DeleteChildDevicesNotSelected() {
 	deleteChildren(selectedSwitches, getSwitches())  
+    deleteChildren(selectedDimmers, getDimmers()) 
 }
 
-def UpdateSelectedDevices()
-{
+def UpdateSelectedDevices() {
 	DeleteChildDevicesNotSelected()    
     	
     createNewDevices(selectedSwitches, getSwitches(), "Insteon Switch")   
+    createNewDevices(selectedDimmers, getDimmers(), "Insteon Dimmable Switch")   
 }
 
-private def createNewDevices(selected, existing, deviceType)
-{
+private def createNewDevices(selected, existing, deviceType) {
 	if (selected)
     {    	
      	selected.each { dni ->
@@ -580,7 +583,7 @@ private def createNewDevices(selected, existing, deviceType)
             if (!d)
             {
             	def newDevice
-            	newDevice = existing.find { (app.id + it.value.id) == dni}
+            	newDevice = existing.find { (app.id + "/" + it.value.id) == dni}
                 d = addChildDevice("bitbounce",deviceType, dni, newDevice?.value.hub, [name: newDevice?.value.name])
                 DEBUG("Created new " + deviceType)
             }           
@@ -603,8 +606,7 @@ def generateAccessToken() {
   
 }
 
-private insteonHubConnect()
-{
+private insteonHubConnect() {
 	DEBUG("Connecting to Insteon Local Hub")
     
     generateAccessToken()
@@ -620,7 +622,7 @@ Map switchesDiscovered() {
 	
     switches.each {
         def value = "${it?.value?.name}"
-        def key = app.id + it?.value?.id 
+        def key = app.id + "/" + it?.value?.id 
         map["${key}"] = value
     }
 
@@ -631,6 +633,23 @@ def getSwitches() {
 	state.switches = state.switches ?: [:]
 }
 
+Map dimmersDiscovered() {
+	def d =  getDimmers()
+	def map = [:]
+	
+    d.each {
+        def value = "${it?.value?.name}"
+        def key = app.id + "/" + it?.value?.id 
+        map["${key}"] = value
+    }
+
+	map
+}
+
+def getDimmers() {
+	state.dimmers = state.dimmers ?: [:]
+}
+
 /************************************************************
 *	Insteon Functions
 */
@@ -639,11 +658,12 @@ private updateDevice()
 	def insteonId = params.id
     def status = params.status
 
-	def childDevice = getChildDevice((app.id + insteonId))
+	TRACE("Update device hit:" + insteonId + ":" + status)
+	def childDevice = getChildDevice((app.id + "/" + insteonId))
     
     if (childDevice)
-    {
-    	childDevice.update("${status}")                
+    {    	
+    	childDevice.update(status)                
     }    
 }
 

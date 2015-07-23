@@ -1,4 +1,6 @@
-﻿using RestSharp;
+﻿using Insteon.Daemon.Common.Settings;
+using Insteon.Network.Device;
+using RestSharp;
 
 namespace Insteon.Daemon.Common.Service
 {
@@ -36,6 +38,16 @@ namespace Insteon.Daemon.Common.Service
 
             var response = client.Execute(request);
             return response.Content.Contains("ok");
+        }
+
+        public bool PushDeviceStatusUpdate(InsteonDevice device, InsteonDeviceStatus status)
+        {
+            string path = string.Format("{0}device/{1}/{2}", rootPath, device.Address, status);
+            var request = new RestRequest(path, Method.PUT) { RequestFormat = DataFormat.Json };
+            request.AddQueryParameter("access_token", settings.AccessToken);
+
+            var response = client.Execute(request);
+            return response.Content.Contains("ok");  
         }
     }
 }

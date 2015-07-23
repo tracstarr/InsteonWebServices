@@ -1,4 +1,4 @@
-﻿namespace Insteon.Daemon.Common
+﻿namespace Insteon.Daemon.Common.Settings
 {
     public class SmartThingsSettings
     {

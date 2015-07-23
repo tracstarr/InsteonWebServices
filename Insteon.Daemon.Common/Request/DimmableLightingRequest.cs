@@ -3,9 +3,10 @@ using ServiceStack;
 namespace Insteon.Daemon.Common.Request
 {
     [Route("/lighting/dimmable", "PUT", Summary = "Send DTO to set on level")]
-    [Route("/lighting/dimmable/{DeviceId}/{onlevel}", "PUT", Summary = "Set the on level of the given device.")]
     public class DimmableLightingRequest : InsteonDeviceRequest
     {
-        public byte OnLevel { get; set; }
+        public byte Level { get; set; }
+        public bool State { get; set; }
+        public bool Fast { get; set; }
     }
 }

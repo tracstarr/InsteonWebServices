@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using Insteon.Daemon.Common.Request;
 using Insteon.Daemon.Common.Response;
+using Insteon.Daemon.Common.Settings;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
 using ServiceStack;
+using SettingsProviderNet;
 
 namespace Insteon.Daemon.Common.Service
 {
@@ -69,10 +71,12 @@ namespace Insteon.Daemon.Common.Service
 
         public ResponseStatus Put(SmartThingsSettingsRequest request)
         {
-            // always reset values
             settings.AccessToken = request.AccessToken;
             settings.Location = request.Location;
             settings.ApplicationId = request.AppId;
+
+            var settingsProvider = new SettingsProvider(new RoamingAppDataStorage("Insteon"));
+            settingsProvider.SaveSettings(settings);
 
             var cb = new SmartThingsCallbacks(settings);
 
@@ -84,6 +88,9 @@ namespace Insteon.Daemon.Common.Service
             settings.AccessToken = null;
             settings.Location = null;
             settings.ApplicationId = null;
+
+            var settingsProvider = new SettingsProvider(new RoamingAppDataStorage("Insteon"));
+            settingsProvider.SaveSettings(settings);
 
             var cb = new SmartThingsCallbacks(settings);
 
