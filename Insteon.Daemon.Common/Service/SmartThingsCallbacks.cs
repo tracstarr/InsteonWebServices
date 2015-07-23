@@ -42,12 +42,23 @@ namespace Insteon.Daemon.Common.Service
 
         public bool PushDeviceStatusUpdate(InsteonDevice device, InsteonDeviceStatus status)
         {
-            string path = string.Format("{0}device/{1}/{2}", rootPath, device.Address, status);
-            var request = new RestRequest(path, Method.PUT) { RequestFormat = DataFormat.Json };
-            request.AddQueryParameter("access_token", settings.AccessToken);
+            RestRequest request = null;
 
-            var response = client.Execute(request);
-            return response.Content.Contains("ok");  
+            if (device.Identity.DevCat == 0x02)
+            {
+                string path = string.Format("{0}switchupdate/{1}/{2}", rootPath, device.Address, status);
+                request = new RestRequest(path, Method.PUT) { RequestFormat = DataFormat.Json };
+            }
+
+            if (request != null)
+            {
+                request.AddQueryParameter("access_token", settings.AccessToken);
+
+                var response = client.Execute(request);
+                return response.Content.Contains("ok");
+            }
+
+            return false;
         }
     }
 }

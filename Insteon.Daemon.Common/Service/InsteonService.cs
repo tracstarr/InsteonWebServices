@@ -40,7 +40,7 @@ namespace Insteon.Daemon.Common.Service
             {
                 return new ResponseStatus("102", exception.Message);
             }
-            
+
             return new ResponseStatus();
         }
 
@@ -50,7 +50,13 @@ namespace Insteon.Daemon.Common.Service
 
             foreach (InsteonDevice device in manager.Network.Devices)
             {
-                result.Devices.Add(new DeviceInfo() { Address = device.Address.ToString(), Category = device.Identity.GetDeviceCategoryName() });
+                result.Devices.Add(new DeviceInfo()
+                {
+                    Address = device.Address.ToString(),
+                    Category = device.Identity.GetDeviceCategoryName(),
+                    SubCategory = device.Identity.GetSubCategoryName(),
+                    Name = device.DeviceName
+                });
             }
 
             return result;

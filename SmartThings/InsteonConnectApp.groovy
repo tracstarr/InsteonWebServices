@@ -57,9 +57,9 @@ mappings {
            GET: "revokeHandler",
        ]
    	}
-   	path("/device/:id/:status/:payload") {
+   	path("/switchupdate/:id/:status") {
        action: [
-           PUT: "deviceHandler",
+           PUT: "switchHandler",
        ]
    	}
 }
@@ -179,10 +179,11 @@ def resetDeviceListPage (){
 	state.gotDevices = false
     state.waitOnRestCall = false
     state.switches = null
+    state.dimmers = null
     
     return dynamicPage(name:"resetDeviceListPage", title:"Reset Devices") {
 			section() {
-				paragraph "Reset..."
+				paragraph "Reset."
 			}
 		}
 }
@@ -288,8 +289,8 @@ def revokeHandler(){
     return [result  : "ok"]
 }
 
-def deviceHandler(){
-	updateDevice()
+def switchHandler(){
+	updateSwitch()
 }
 
 /************************************************************
@@ -345,7 +346,13 @@ def lanHandler(evt) {
                         }
                         else if (it?.category?.equalsIgnoreCase("Sensors and Actuators"))
                         {
-                            DEBUG("not implemented")                                  		
+                        	if (it?.subCategory.toLowerCase().contains("iolinc"))
+                            {
+                            	DEBUG("IOLINC")
+                            }
+                            else {
+                            	DEBUG("not implemented")                                  		
+                            }
                         }
                         else
                         {
@@ -356,7 +363,7 @@ def lanHandler(evt) {
                         {
                             DEBUG("Adding to device list")
                             def dname = it?.name ?: it?.address
-                            d[it?.address] = [id: it.address, name: dname, deviceType: it.category, hub: parsedEvent.hub]   
+                            d[it.address] = [id: it.address, name: dname, category: it?.category, deviceType: it?.subCategory, hub: parsedEvent.hub]   
                         }
                     }
 
@@ -543,7 +550,7 @@ def setDimmerState(insteonDevice, state, level, fast)
 def deleteChildren(selected, existing){
 	// given all known devices, search the list of selected ones, if the device isn't selected, see if it exists as a device, if it does, remove it.
     existing.each { device ->
-    	def dni = app.id + device.value.id
+    	def dni = app.id + "/" + device.value.id
         def sel
         
         if (selected)
@@ -653,7 +660,7 @@ def getDimmers() {
 /************************************************************
 *	Insteon Functions
 */
-private updateDevice() 
+private updateSwitch() 
 {	
 	def insteonId = params.id
     def status = params.status

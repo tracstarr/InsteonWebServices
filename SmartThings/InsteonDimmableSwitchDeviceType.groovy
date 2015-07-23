@@ -34,10 +34,10 @@ metadata {
 
 	tiles {
 		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: false) {
-			state "on", label: 'Fast off', action: "switch.off", icon: "st.switches.light.on", backgroundColor: "#79b821"
-			state "off", label: 'Fast on', action: "switch.on", icon: "st.switches.light.off", backgroundColor: "#ffffff"
+			state "on", label: '${name}', action: "switch.off", icon: "st.switches.light.on", backgroundColor: "#79b821"
+			state "off", label: '${name}', action: "switch.on", icon: "st.switches.light.off", backgroundColor: "#ffffff"
 		}	
-        standardTile("ramp", "device.switch", width: 1, height: 1, canChangeIcon: false) {
+        standardTile("ramp", "device.switch", width: 1, height: 1, canChangeIcon: false, decoration: "flat") {
 			state "on", label: 'Ramp off', action: "rampOff", icon: "st.switches.light.on", backgroundColor: "#0066CC"
 			state "off", label: 'Ramp on', action: "rampOn", icon: "st.switches.light.off", backgroundColor: "#99CCFF"
 		}	        
@@ -75,6 +75,8 @@ def rampOn()
 
 def on() {
 	log.debug "on"
+    // current backend doesn't allow fast-on to a provided level. This is just to keep ui in sync.
+    setLevel(255)
 	setDimmer("on", 1)    
 }
 

@@ -27,20 +27,17 @@ namespace Insteon.Network.Device
 
         internal InsteonDevice(InsteonNetwork network, InsteonAddress address, InsteonIdentity identity)
         {
-            DisplayName = DeviceName;
             this.network = network;
             Address = address;
             Identity = identity;
             ackTimer = new Timer(PendingCommandTimerCallback, null, Timeout.Infinite, Constants.deviceAckTimeout);
         }
-
-        public string DisplayName { get; set; }
-
+        
         public string DeviceName
         {
             get
             {
-                return Identity.GetSubCategoryName();
+                return string.Format("{0} [{1}]", Identity.GetSubCategoryName(), Address);
             }
         }
 
