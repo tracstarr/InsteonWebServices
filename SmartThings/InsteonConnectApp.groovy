@@ -57,9 +57,14 @@ mappings {
            GET: "revokeHandler",
        ]
    	}
-   	path("/switchupdate/:id/:status") {
+   	path("/deviceupdate/:id/:status") {
        action: [
-           PUT: "switchHandler",
+           PUT: "deviceHandler",
+       ]
+   	}
+    path("/dimmerupdate/:id/:status/:level") {
+       action: [
+           PUT: "dimmerHandler",
        ]
    	}
 }
@@ -289,8 +294,12 @@ def revokeHandler(){
     return [result  : "ok"]
 }
 
-def switchHandler(){
-	updateSwitch()
+def deviceHandler(){
+	updateDevice()
+}
+
+def dimmerHandler(){
+	updateDimmer()
 }
 
 /************************************************************
@@ -329,6 +338,15 @@ def lanHandler(evt) {
                 if (body?.action?.equalsIgnoreCase("status"))
                 {               	
                     state.isLinked = body?.isOk
+                }
+                else if (body?.level != null)
+                {
+                	// should be dimmalbe status response
+                    DEBUG("dimmable status response")
+                    // from insteon docs, level 0 means it's "off", not necessarly the dimmable set level. If off, don't bother changing the dim level in the ui
+                    if (body?.level > 0){
+                    	updateDimmerCurrentLevel(body?.deviceId, body?.level)
+                    }
                 }
                 else if (body?.devices != null)
                 {           
@@ -484,6 +502,9 @@ private def api(method, args) {
         'refreshDevice':
         	[uri:"/refresh/device?" + toQueryString(args),
             	type: 'get'],
+        'refreshDimmer':
+        	[uri:"/status/lighting/dimmer?" + toQueryString(args),
+            	type: 'get'],
         'fullrefresh':
         	[uri:"/forcestatusrefresh",
             	type: 'get'],
@@ -529,7 +550,7 @@ private putapi(params, uri) {
 	sendHubCommand(hubAction)    
 }
 /************************************************************
-*	Functions
+*	Child Device Functions
 */
 def setSwitchState(insteonDevice, mode)
 {	
@@ -547,6 +568,17 @@ def setDimmerState(insteonDevice, state, level, fast)
     api("setdimmer", params)    
 }
 
+def getDimmerStatus(insteonDevice)
+{
+	def pId = insteonDevice?.device?.deviceNetworkId
+    pId = pId.substring(pId.lastIndexOf("/") + 1)	
+	def params = ["deviceId": "${pId}"]
+    api("refreshDimmer", params)    
+}
+
+/************************************************************
+*	Methods
+*/
 def deleteChildren(selected, existing){
 	// given all known devices, search the list of selected ones, if the device isn't selected, see if it exists as a device, if it does, remove it.
     existing.each { device ->
@@ -660,7 +692,7 @@ def getDimmers() {
 /************************************************************
 *	Insteon Functions
 */
-private updateSwitch() 
+private updateDevice() 
 {	
 	def insteonId = params.id
     def status = params.status
@@ -671,6 +703,30 @@ private updateSwitch()
     if (childDevice)
     {    	
     	childDevice.update(status)                
+    }    
+}
+
+private updateDimmer()
+{
+	def insteonId = params.id
+    def status = params.status
+   
+	TRACE("Update device hit:" + insteonId + ":" + status)
+	def childDevice = getChildDevice((app.id + "/" + insteonId))
+    
+    if (childDevice)
+    {    	
+    	childDevice.update(status)                
+    }    
+}
+
+private updateDimmerCurrentLevel(insteonId, level)
+{
+	def childDevice = getChildDevice((app.id + "/" + insteonId))
+    
+    if (childDevice)
+    {    	
+    	childDevice.setUiLevel(level)                
     }    
 }
 

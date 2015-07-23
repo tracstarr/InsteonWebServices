@@ -1,6 +1,7 @@
 ﻿using Insteon.Daemon.Common.Settings;
 using Insteon.Network.Device;
 using RestSharp;
+using ServiceStack.Logging;
 
 namespace Insteon.Daemon.Common.Service
 {
@@ -12,6 +13,7 @@ namespace Insteon.Daemon.Common.Service
         private readonly RestClient client;
         private readonly string rootPath;
 
+        private readonly ILog logger = LogManager.GetLogger(typeof(SmartThingsCallbacks));
         public SmartThingsCallbacks(SmartThingsSettings settings)
         {
             this.settings = settings;
@@ -23,9 +25,9 @@ namespace Insteon.Daemon.Common.Service
         public bool Authorization()
         {
             string path = string.Format("{0}link", rootPath);
-            var request = new RestRequest(path, Method.GET) {RequestFormat = DataFormat.Json};
+            var request = new RestRequest(path, Method.GET) { RequestFormat = DataFormat.Json };
             request.AddQueryParameter("access_token", settings.AccessToken);
-            
+
             var response = client.Execute(request);
             return response.Content.Contains("ok");
         }
@@ -42,23 +44,19 @@ namespace Insteon.Daemon.Common.Service
 
         public bool PushDeviceStatusUpdate(InsteonDevice device, InsteonDeviceStatus status)
         {
-            RestRequest request = null;
+            //note: because the parent caller of this event is an InsteonDevice which is processing a current message received event, it's not been "reset" and we cannot
+            //make a call to GetOnLevel for dimmable devices as no response will be handled. We must "ask" ST to make another rest call to obtain current state. All we can 
+            //do here is tell it there is an update.
 
-            if (device.Identity.DevCat == 0x02)
-            {
-                string path = string.Format("{0}switchupdate/{1}/{2}", rootPath, device.Address, status);
-                request = new RestRequest(path, Method.PUT) { RequestFormat = DataFormat.Json };
-            }
+            string path = string.Format("{0}deviceupdate/{1}/{2}", rootPath, device.Address, status);
+            var request = new RestRequest(path, Method.PUT) { RequestFormat = DataFormat.Json };
 
-            if (request != null)
-            {
-                request.AddQueryParameter("access_token", settings.AccessToken);
+            request.AddQueryParameter("access_token", settings.AccessToken);
 
-                var response = client.Execute(request);
-                return response.Content.Contains("ok");
-            }
+            var response = client.Execute(request);
 
-            return false;
+            logger.Info(response.Content);
+            return response.Content.Contains("ok");
         }
     }
 }

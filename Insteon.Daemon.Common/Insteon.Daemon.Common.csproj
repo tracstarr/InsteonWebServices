@@ -89,12 +89,14 @@
   <ItemGroup>
     <Compile Include="Request\ConnectToInsteonNetworkRequest.cs" />
     <Compile Include="Request\DimmableLightingRequest.cs" />
+    <Compile Include="Request\DimmerStatusRequest.cs" />
     <Compile Include="Request\EnterLinkModeRequest.cs" />
     <Compile Include="Request\GetDevices.cs" />
     <Compile Include="Request\GetStatus.cs" />
     <Compile Include="Request\InsteonDeviceRequest.cs" />
     <Compile Include="Request\SmartThingsSettingsResetRequest.cs" />
     <Compile Include="Response\DeviceInfo.cs" />
+    <Compile Include="Response\DimmerStatusResponse.cs" />
     <Compile Include="Response\GetDevicesResponse.cs" />
     <Compile Include="InsteonAppListenerHost.cs" />
     <Compile Include="InsteonManager.cs" />

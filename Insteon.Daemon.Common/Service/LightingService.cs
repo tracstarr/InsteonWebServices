@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Web.Configuration;
 using Insteon.Daemon.Common.Request;
-using Insteon.Daemon.Common.Settings;
+using Insteon.Daemon.Common.Response;
 using Insteon.Network.Device;
 using Insteon.Network.Devices;
 using ServiceStack;
@@ -11,14 +10,12 @@ namespace Insteon.Daemon.Common.Service
     public class LightingService : IService
     {
         private readonly InsteonManager manager;
-        private readonly SmartThingsSettings settings;
 
-        public LightingService(InsteonManager manager, SmartThingsSettings settings)
+        public LightingService(InsteonManager manager)
         {
             this.manager = manager;
-            this.settings = settings;
         }
-        
+
         public string Put(SwitchedLightingRequest request)
         {
             InsteonAddress address;
@@ -82,6 +79,35 @@ namespace Insteon.Daemon.Common.Service
             }
 
             return true.ToJson();
+        }
+
+        public DimmerStatusResponse Get(DimmerStatusRequest request)
+        {
+            InsteonAddress address;
+            if (InsteonAddress.TryParse(request.DeviceId, out address))
+            {
+                if (manager.Network.Devices.ContainsKey(address))
+                {
+                    var device = manager.Network.Devices.Find(address) as DimmableLighting;
+                    if (device == null)
+                    {
+                        throw HttpError.Unauthorized("Not a valid dimmable lighting device.");
+                    }
+
+                    byte value;
+                    if (device.TryGetOnLevel(out value))
+                    {
+                        return new DimmerStatusResponse() { DeviceId = request.DeviceId, Level = value };
+                    }
+                    throw new Exception("No response from device " + request.DeviceId);
+                }
+                else
+                {
+                    throw HttpError.NotFound("Device does not exist or is not linked.");
+                }
+            }
+
+            throw HttpError.NotFound("Device does not exist or is not linked.");
         }
 
     }

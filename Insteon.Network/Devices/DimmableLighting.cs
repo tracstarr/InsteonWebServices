@@ -20,6 +20,7 @@ namespace Insteon.Network.Devices
         /// <returns>True if the device responds with an ACK</returns>
         public bool TurnOn(byte onLevel)
         {
+            //note: i don't think this is actually possible. The fast-on command goes to the preset level
             return TryCommand(InsteonDirectCommands.FastOn, onLevel); 
         }
 

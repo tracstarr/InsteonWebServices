@@ -320,7 +320,8 @@ namespace Insteon.Network.Device
             var status = network.Messenger.TrySend(message);
             if (status == EchoStatus.ACK)
             {
-                ackTimer.Change(Constants.deviceAckTimeout, Timeout.Infinite); // start ACK timeout timer   
+                ackTimer.Change(Constants.deviceAckTimeout, Timeout.Infinite); // start ACK timeout timer  
+                ClearPendingCommand();
                 return true;
             }
             ClearPendingCommand();
@@ -348,6 +349,7 @@ namespace Insteon.Network.Device
             {
                 value = (byte)properties[PropertyKey.Cmd2];
                 logger.DebugFormat("Device {0} GetOnLevel returning {1:X2}", Address.ToString(), value);
+                ClearPendingCommand();
                 return true;
             }
             ClearPendingCommand();

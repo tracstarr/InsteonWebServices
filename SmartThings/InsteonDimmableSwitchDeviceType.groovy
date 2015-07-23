@@ -53,10 +53,12 @@ metadata {
 	}
 }
 
-def update(String status, level )
+// this function is called from SmartApp. Due to the messaging system of the insteon network we must request seperatly the current
+// on level when we receive the push notification that the device changed
+def update(String status)
 {	
-  sendEvent (name: "switch", value: "${status}")
-  sendEvent (name: "level", value: level)
+  	sendEvent (name: "switch", value: "${status}")
+    refresh()
 }
 
 def setDimmer(state, fast)
@@ -95,7 +97,7 @@ def setLevel(value)
 {
 	sendEvent(name: "level", value: value)
 	def state = device.currentState("switch")?.value
-    
+    log.trace "current state ${state}"
     if (state == "on")
     {
     	log.trace "setLevel: ${value}"
@@ -103,6 +105,16 @@ def setLevel(value)
     }
 }
 
+def setUiLevel(value)
+{
+	//note: for some reason if i just set the level value, the state becomes "Dim". I have no clue where/why
+	sendEvent(name: "level", value: value)
+    
+    def state = (value > 0) ? "on":"off"
+    sendEvent(name: "switch", value: state)
+}
+
 def refresh() {
-	log.debug "Not Implemented"
+	log.debug "Refresh status"
+    parent.getDimmerStatus(this)
 }
