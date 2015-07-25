@@ -1,4 +1,4 @@
-namespace Insteon.Daemon.Common.Request
+namespace Insteon.ServiceModel.Request
 {
     public abstract class InsteonDeviceRequest
     {

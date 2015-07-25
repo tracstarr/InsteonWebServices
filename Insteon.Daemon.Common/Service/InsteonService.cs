@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Insteon.Daemon.Common.Request;
-using Insteon.Daemon.Common.Response;
 using Insteon.Daemon.Common.Settings;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using Insteon.Network.Helpers;
+using Insteon.ServiceModel.Request;
+using Insteon.ServiceModel.Response;
 using ServiceStack;
 using SettingsProviderNet;
 

@@ -1,6 +1,6 @@
 using ServiceStack;
 
-namespace Insteon.Daemon.Common.Request
+namespace Insteon.ServiceModel.Request
 {
     [Route("/configure/reset", "GET", Summary = "Reset SmartThings configuration.")]
     public class SmartThingsSettingsResetRequest

@@ -1,8 +1,8 @@
 ﻿using System;
-using Insteon.Daemon.Common.Request;
-using Insteon.Daemon.Common.Response;
 using Insteon.Network.Device;
 using Insteon.Network.Devices;
+using Insteon.ServiceModel.Request;
+using Insteon.ServiceModel.Response;
 using ServiceStack;
 
 namespace Insteon.Daemon.Common.Service

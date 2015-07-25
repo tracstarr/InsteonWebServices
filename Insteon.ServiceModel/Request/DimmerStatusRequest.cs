@@ -1,7 +1,7 @@
-﻿using Insteon.Daemon.Common.Response;
+﻿using Insteon.ServiceModel.Response;
 using ServiceStack;
 
-namespace Insteon.Daemon.Common.Request
+namespace Insteon.ServiceModel.Request
 {
     [Route("/status/lighting/dimmer", "GET", Summary = "Get the state of the dimmer")]
     public class DimmerStatusRequest : IReturn<DimmerStatusResponse>

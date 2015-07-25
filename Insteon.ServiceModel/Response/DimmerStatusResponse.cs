@@ -1,4 +1,4 @@
-﻿namespace Insteon.Daemon.Common.Response
+﻿namespace Insteon.ServiceModel.Response
 {
     public class DimmerStatusResponse
     {

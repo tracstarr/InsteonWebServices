@@ -1,6 +1,6 @@
 using ServiceStack;
 
-namespace Insteon.Daemon.Common.Request
+namespace Insteon.ServiceModel.Request
 {
     [Route("/configure", "PUT", Summary = "Configure SmartThings Hub information.")]
     public class SmartThingsSettingsRequest

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using ServiceStack;
 
-namespace Insteon.Daemon.Common.Response
+namespace Insteon.ServiceModel.Response
 {
     public class GetDevicesResponse : IHasResponseStatus
     {		

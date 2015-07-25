@@ -87,25 +87,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Request\ConnectToInsteonNetworkRequest.cs" />
-    <Compile Include="Request\DimmableLightingRequest.cs" />
-    <Compile Include="Request\DimmerStatusRequest.cs" />
-    <Compile Include="Request\EnterLinkModeRequest.cs" />
-    <Compile Include="Request\GetDevices.cs" />
-    <Compile Include="Request\GetStatus.cs" />
-    <Compile Include="Request\InsteonDeviceRequest.cs" />
-    <Compile Include="Request\SmartThingsSettingsResetRequest.cs" />
-    <Compile Include="Response\DeviceInfo.cs" />
-    <Compile Include="Response\DimmerStatusResponse.cs" />
-    <Compile Include="Response\GetDevicesResponse.cs" />
     <Compile Include="InsteonAppListenerHost.cs" />
     <Compile Include="InsteonManager.cs" />
-    <Compile Include="Response\InsteonServiceResponse.cs" />
     <Compile Include="ServiceStartup.cs" />
     <Compile Include="Service\InsteonService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Request\SwitchedLightingRequest.cs" />
-    <Compile Include="Request\SmartThingsSettingsRequest.cs" />
     <Compile Include="Service\LightingService.cs" />
     <Compile Include="Service\SmartThingsCallbacks.cs" />
     <Compile Include="Settings\SmartThingsSettings.cs" />
@@ -150,6 +136,10 @@
     <ProjectReference Include="..\Insteon.Network\Insteon.Network.csproj">
       <Project>{89c16795-688b-42d8-a701-0831d4c3fb96}</Project>
       <Name>Insteon.Network</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Insteon.ServiceModel\Insteon.ServiceModel.csproj">
+      <Project>{1298226b-5597-47b6-a2ba-ffbaf2c92c2a}</Project>
+      <Name>Insteon.ServiceModel</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

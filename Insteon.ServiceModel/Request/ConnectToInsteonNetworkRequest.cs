@@ -1,6 +1,6 @@
 ﻿using ServiceStack;
 
-namespace Insteon.Daemon.Common.Request
+namespace Insteon.ServiceModel.Request
 {
     [Route("/connect", "GET", Summary = "Connect to the insteon network")]
     public class ConnectToInsteonNetworkRequest

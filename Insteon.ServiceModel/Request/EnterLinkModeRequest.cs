@@ -1,6 +1,6 @@
 ﻿using ServiceStack;
 
-namespace Insteon.Daemon.Common.Request
+namespace Insteon.ServiceModel.Request
 {
     [Route("/link/{start}", "PUT", Summary = "Enter/Exit linking mode.")]
     [Route("/link", "PUT", Summary = "Enter/Exit linking mode.")]

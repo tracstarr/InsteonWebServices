@@ -1,6 +1,6 @@
 using ServiceStack;
 
-namespace Insteon.Daemon.Common.Request
+namespace Insteon.ServiceModel.Request
 {
     [Route("/lighting/dimmable", "PUT", Summary = "Send DTO to set on level")]
     public class DimmableLightingRequest : InsteonDeviceRequest
