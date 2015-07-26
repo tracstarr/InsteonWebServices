@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Linq;
 using Insteon.Network;
 using Insteon.Network.Device;
@@ -26,10 +27,10 @@ namespace Insteon.Tests
         {
             if (network != null && network.IsConnected)
                 network.Close();
-            
+
             network = null;
         }
-        
+
         [Test]
         public void SimpleConnectKnownSerialPortTest()
         {
@@ -48,7 +49,7 @@ namespace Insteon.Tests
         {
             network = new InsteonNetwork();
             var connected = network.TryConnect();
-            
+
             Assert.IsTrue(connected);
             Assert.AreEqual(network.Connection.Address.Value, InsteonAddress.Parse(ConfigurationManager.AppSettings["plmIdentityTest"]).Value);
             network.Close();
@@ -64,14 +65,19 @@ namespace Insteon.Tests
             Assert.IsTrue(network.VerifyConnection());
             network.Close();
         }
-        
+
         [Test]
         public void GetLinksTest()
         {
             network = new InsteonNetwork();
             var connected = network.TryConnect();
             Assert.IsTrue(connected);
-            var links = network.Controller.GetLinks();
+            var links = network.Controller.GetDeviceLinkRecords();
+
+            foreach (var link in links)
+            {
+                Console.WriteLine(link.Address + ":" + link.RecordType);
+            }
 
             Assert.IsNotEmpty(links);
             network.Close();
@@ -84,31 +90,32 @@ namespace Insteon.Tests
             network = new InsteonNetwork();
             var connected = network.TryConnect();
             Assert.IsTrue(connected);
-            var links = network.Controller.GetLinks();
+            var links = network.Controller.GetDeviceLinkRecords();
 
             Assert.IsNotEmpty(links);
 
-            var responders = links.Where(l => l.RecordType == InsteonDeviceLinkRecordType.Responder);
-           
 
-            foreach (var insteonDeviceLinkRecord in responders)
+            var insteonAddresses = links.Select(l => l.Address).Distinct();
+
+
+            foreach (var insteonAddress in insteonAddresses)
             {
-                
-                if (network.Devices.ContainsKey(insteonDeviceLinkRecord.Address))
+
+                if (network.Devices.ContainsKey(insteonAddress))
                     continue;
-                
+
                 InsteonIdentity? id;
-                if (network.Controller.TryGetLinkIdentity(insteonDeviceLinkRecord, out id))
+                if (network.Controller.TryGetLinkIdentity(insteonAddress, out id))
                 {
                     if (id != null)
                     {
-                        var d = network.Devices.Add(insteonDeviceLinkRecord.Address, id.Value);
+                        var d = network.Devices.Add(insteonAddress, id.Value);
 
                     }
                 }
                 else
                 {
-                   Assert.Ignore("Possibly a battery powered device.");
+                    Console.WriteLine("Possibly a battery powered device.");
                 }
             }
 

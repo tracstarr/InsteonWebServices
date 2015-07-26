@@ -89,6 +89,7 @@
     <Compile Include="InsteonNetworkBridge.cs" />
     <Compile Include="Device\InsteonDevice.cs" />
     <Compile Include="Device\InsteonDeviceList.cs" />
+    <Compile Include="Message\InsteonUnknownDeviceEventArgs.cs" />
     <Compile Include="Serial\ISerialPort.cs" />
     <Compile Include="InsteonNetwork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

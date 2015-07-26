@@ -23,7 +23,7 @@
         /// <summary>
         /// Queries a device for its INSTEON identity (DevCat, SubCat, FirmwareVersion).
         /// </summary>
-        IDRequest = 0x10,
+        IdRequest = 0x10,
 
         /// <summary>
         /// Commands a device to turn on. If the target device is a dimmer, a second parameter determines the brightness level from 0 (least brightness) to 255 (full brightness).

@@ -17,11 +17,9 @@ namespace Insteon.Data
         public byte SubCategory { get; set; }
         [Required]
         public byte Firmware { get; set; }
-        public byte ProductKeyHigh { get; set; }
-        public byte ProductKeyMid { get; set; }
-        public byte ProductKeyLow { get; set; }
+        public string ProductKey { get; set; }
         [Required]
         public DateTime CreatedDate { get; set; }
-        public DateTime ModifiedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }

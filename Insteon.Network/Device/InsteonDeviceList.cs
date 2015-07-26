@@ -70,6 +70,7 @@ namespace Insteon.Network.Device
         {
             if (identity.IsEmpty)
             {
+                
                 throw new Exception("Identity is empty.");    
             }
 

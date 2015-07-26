@@ -119,8 +119,20 @@ namespace Insteon.Network.Message
                 else if (network.AutoAdd)
                 {
                     logger.DebugFormat("Unknown device {0} received message {1}, adding device", InsteonAddress.Format(address), message.ToString());
-                    InsteonDevice device = network.Devices.Add(new InsteonAddress(address), new InsteonIdentity());
-                    device.OnMessage(message);
+
+                    //note: due to how messages are handled and how devices cannot receive new messages while pending sends (I think) we should only add on certain message types.
+                    // right now I've only tested devices where we get broadcast messages. Thus, we wait until the last message received. 
+                    if (message.MessageType == InsteonMessageType.SuccessBroadcast)
+                    {
+                        InsteonIdentity? id;
+
+                        // TODO: probably shouldn't be in a while loop. Need a better way to address this
+                        while (!network.Controller.TryGetLinkIdentity(new InsteonAddress(address), out id))
+                        {
+                            InsteonDevice device = network.Devices.Add(new InsteonAddress(address), id.Value);
+                            device.OnMessage(message);
+                        }
+                    }
                 }
                 else
                 {
@@ -319,13 +331,15 @@ namespace Insteon.Network.Message
             {
                 if (!IsDuplicateMessage(message))
                 {
-                    logger.DebugFormat("PROCESSOR: Message '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
+                    //logger.DebugFormat("PROCESSOR: Message '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
+                    logger.DebugFormat("PROCESSOR: Message '{0}' processed...", Utilities.ByteArrayToString(data, offset, count));
                     OnMessage(message);
                     UpdateWaitItems(message);
                 }
                 else
                 {
-                    logger.DebugFormat("PROCESSOR: Message '{0}' duplicate ignored...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
+                    //logger.DebugFormat("PROCESSOR: Message '{0}' duplicate ignored...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), message.ToString("Log"));
+                    logger.DebugFormat("PROCESSOR: Message '{0}' duplicate ignored...", Utilities.ByteArrayToString(data, offset, count));
                 }
                 return true;
             }
@@ -339,7 +353,8 @@ namespace Insteon.Network.Message
             {
                 if (InsteonMessageProcessor.ProcessMessage(data, offset, out count, out echoMessage))
                 {
-                    logger.DebugFormat("PROCESSOR: Echo '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), echoMessage.ToString("Log"));
+                    //logger.DebugFormat("PROCESSOR: Echo '{0}' processed...\r\n{1}", Utilities.ByteArrayToString(data, offset, count), echoMessage.ToString("Log"));
+                    logger.DebugFormat("PROCESSOR: Echo '{0}' processed...", Utilities.ByteArrayToString(data, offset, count));
                     return true;
                 }
                 return false;

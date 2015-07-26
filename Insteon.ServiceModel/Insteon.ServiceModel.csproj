@@ -61,6 +61,7 @@
     <Compile Include="Request\GetDevices.cs" />
     <Compile Include="Request\GetStatus.cs" />
     <Compile Include="Request\InsteonDeviceRequest.cs" />
+    <Compile Include="Request\RefreshDeviceLinksRequest.cs" />
     <Compile Include="Request\SmartThingsSettingsRequest.cs" />
     <Compile Include="Request\SmartThingsSettingsResetRequest.cs" />
     <Compile Include="Request\SwitchedLightingRequest.cs" />

@@ -133,6 +133,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Insteon.Data\Insteon.Data.csproj">
+      <Project>{b9b918d1-176a-4a1b-b733-c6a7c3076c8a}</Project>
+      <Name>Insteon.Data</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Insteon.Network\Insteon.Network.csproj">
       <Project>{89c16795-688b-42d8-a701-0831d4c3fb96}</Project>
       <Name>Insteon.Network</Name>

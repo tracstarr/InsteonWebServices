@@ -6,6 +6,7 @@ using Insteon.Network.Commands;
 using Insteon.Network.Device;
 using Insteon.Network.Enum;
 using Insteon.Network.Message;
+using ServiceStack;
 using ServiceStack.Logging;
 
 namespace Insteon.Network
@@ -15,10 +16,12 @@ namespace Insteon.Network
     /// </summary>
     public class InsteonController
     {
-        private ILog logger = LogManager.GetLogger(typeof (InsteonController));
+        private ILog logger = LogManager.GetLogger(typeof(InsteonController));
         private readonly InsteonNetwork network;
         private readonly Timer timer = new Timer();
         private InsteonLinkMode? linkingMode;
+        private List<InsteonDeviceLinkRecord> deviceLinkRecords;
+
 
         internal InsteonController(InsteonNetwork network)
             : this(
@@ -44,6 +47,7 @@ namespace Insteon.Network
                     IsInLinkingMode = false;
                     OnDeviceLinkTimeout();
                 };
+            
         }
 
         /// <summary>
@@ -75,6 +79,29 @@ namespace Insteon.Network
         /// Invoked when an INSTEON device is unlinked from the controller device.
         /// </summary>
         public event InsteonDeviceEventHandler DeviceUnlinked;
+      
+        public List<InsteonDeviceLinkRecord> GetDeviceLinkRecords(bool forceRefresh = false)
+        {
+            if (deviceLinkRecords == null || deviceLinkRecords.IsEmpty() || forceRefresh)
+            {
+                RefreshDeviceLinkRecords();
+            }
+
+            return deviceLinkRecords;
+
+        }
+
+        public bool RefreshDeviceLinkRecords()
+        {
+            InsteonDeviceLinkRecord[] links;
+            if (TryGetLinks(out links))
+            {
+                deviceLinkRecords = new List<InsteonDeviceLinkRecord>(links);
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Cancels linking mode in the controller.
@@ -103,20 +130,6 @@ namespace Insteon.Network
             {
                 throw new IOException();
             }
-        }
-
-        /// <summary>
-        /// Returns an array of device links in the INSTEON controller.
-        /// </summary>
-        /// <returns>An array of objects representing each device link.</returns>
-        public InsteonDeviceLinkRecord[] GetLinks()
-        {
-            InsteonDeviceLinkRecord[] links;
-            if (!TryGetLinks(out links))
-            {
-                throw new IOException();
-            }
-            return links;
         }
 
         internal void OnMessage(InsteonMessage message)
@@ -224,13 +237,12 @@ namespace Insteon.Network
         public bool TryGetLinks(out InsteonDeviceLinkRecord[] links)
         {
             links = null;
-            var list = new List<InsteonDeviceLinkRecord>();
+            deviceLinkRecords = new List<InsteonDeviceLinkRecord>();
             Dictionary<PropertyKey, int> properties;
-            EchoStatus status;
 
             logger.DebugFormat("Controller {0} GetLinks", Address.ToString());
             byte[] message1 = { (byte)InsteonModemSerialCommand.GetFirstAllLinkRecord };
-            status = network.Messenger.TrySendReceive(message1, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
+            var status = network.Messenger.TrySendReceive(message1, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
 
             if (status == EchoStatus.NAK)
             {
@@ -245,7 +257,7 @@ namespace Insteon.Network
                     logger.ErrorFormat("Controller {0} null properties object", Address.ToString());
                     return false;
                 }
-                list.Add(new InsteonDeviceLinkRecord(properties));
+                deviceLinkRecords.Add(new InsteonDeviceLinkRecord(properties));
             }
             else
             {
@@ -262,7 +274,7 @@ namespace Insteon.Network
                     logger.ErrorFormat("Controller {0} null properties object", Address.ToString());
                     return false;
                 }
-                list.Add(new InsteonDeviceLinkRecord(properties));
+                deviceLinkRecords.Add(new InsteonDeviceLinkRecord(properties));
                 status = network.Messenger.TrySendReceive(message2, false, (byte)InsteonModemSerialCommand.DeviceLinkRecord, null, out properties);
             }
 
@@ -271,7 +283,7 @@ namespace Insteon.Network
                 return false; // echo was not ACK or NAK
             }
 
-            links = list.ToArray();
+            links = deviceLinkRecords.ToArray();
             logger.DebugFormat("Controller {0} GetLinks returned {1} links", Address.ToString(), links.Length);
             return true;
         }
@@ -279,16 +291,21 @@ namespace Insteon.Network
         public bool TryGetLinkIdentity(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
         {
             //GetProductData(link, out identity) ||
-            return  GetLinkIdentity(link, out identity);
+            return GetLinkIdentity(link.Address, out identity);
         }
 
-        private bool GetLinkIdentity(InsteonDeviceLinkRecord link, out InsteonIdentity? identity)
+        public bool TryGetLinkIdentity(InsteonAddress address, out InsteonIdentity? identity)
+        {
+            return GetLinkIdentity(address, out identity);
+        }
+
+        private bool GetLinkIdentity(InsteonAddress address, out InsteonIdentity? identity)
         {
             Dictionary<PropertyKey, int> properties;
 
             logger.DebugFormat("Device {0} GetLinkIdentity", Address.ToString());
-            byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, link.Address[2], link.Address[1], link.Address[0], 
-                                 (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, (byte)InsteonDirectCommands.IDRequest, Byte.MinValue };
+            byte[] message = { (byte)InsteonModemSerialCommand.StandardOrExtendedMessage, address[2], address[1], address[0], 
+                                 (byte) MessageFlagsStandard.ThreeHopsThreeRemaining, (byte)InsteonDirectCommands.IdRequest, Byte.MinValue };
 
             var status = network.Messenger.TrySendReceive(message, false, (byte)InsteonModemSerialCommand.StandardMessage, InsteonMessageType.SetButtonPressed, out properties);
 
@@ -388,5 +405,6 @@ namespace Insteon.Network
         {
             network.Messenger.Send(CreateGroupMessage(command, group, value));
         }
+
     }
 }

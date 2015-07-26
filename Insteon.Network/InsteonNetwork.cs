@@ -82,7 +82,7 @@ namespace Insteon.Network
         /// Invoked when the connection to an INSTEON network is interrupted.
         /// </summary>
         public event EventHandler Disconnected;
-
+        
         /// <summary>
         /// Connects to an INSTEON network using the specified connection.
         /// </summary>
@@ -167,7 +167,7 @@ namespace Insteon.Network
                 list.AddRange(SmartLincFinder.GetRegisteredSmartLincs());
                 foreach (SmartLincInfo item in list)
                 {
-                    OnConnectProgress(40*list.IndexOf(item)/list.Count + 10, string.Format("Accessing SmartLinc {0} of {1} at {2}", list.IndexOf(item) + 1, list.Count, item.Uri.Host)); // 10% to 50% progress
+                    OnConnectProgress(40 * list.IndexOf(item) / list.Count + 10, string.Format("Accessing SmartLinc {0} of {1} at {2}", list.IndexOf(item) + 1, list.Count, item.Uri.Host)); // 10% to 50% progress
                     if (LastConnectStatus.Cancel)
                     {
                         connections = null;
@@ -196,7 +196,7 @@ namespace Insteon.Network
             {
                 ports = SerialPort.GetPortNames();
             }
-            catch (Win32Exception) {}
+            catch (Win32Exception) { }
             if (ports != null)
             {
                 Array.Sort(ports);
@@ -325,7 +325,7 @@ namespace Insteon.Network
                         sb.AppendFormat("  ({0})", connection.Address);
                     }
 
-                    OnConnectProgress(50*list.IndexOf(connection)/list.Count + 50, sb.ToString()); // 50% to 100% progress
+                    OnConnectProgress(50 * list.IndexOf(connection) / list.Count + 50, sb.ToString()); // 50% to 100% progress
                     if (LastConnectStatus.Cancel)
                     {
                         return false;
@@ -352,5 +352,6 @@ namespace Insteon.Network
         {
             return Messenger.VerifyConnection();
         }
+
     }
 }

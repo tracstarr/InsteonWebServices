@@ -23,7 +23,7 @@ namespace Insteon.Daemon.Common.Service
             this.settings = settings;
         }
 
-        public ResponseStatus Get(ConnectToInsteonNetworkRequest request)
+        public object Get(ConnectToInsteonNetworkRequest request)
         {
             if (manager.Network.IsConnected)
                 return new ResponseStatus("100", "Already connected");
@@ -41,7 +41,17 @@ namespace Insteon.Daemon.Common.Service
                 return new ResponseStatus("102", exception.Message);
             }
 
-            return new ResponseStatus();
+            return true;
+        }
+
+        public object Get(RefreshDeviceLinksRequest request)
+        {
+            if (!manager.Network.IsConnected)
+                throw new Exception("Not Connected");
+            
+            manager.RefreshDeviceDatabase();
+
+            return true;
         }
 
         public GetDevicesResponse Get(GetDevices request)

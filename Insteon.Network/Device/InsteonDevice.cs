@@ -125,7 +125,7 @@ namespace Insteon.Network.Device
         public void Identify()
         {
             Identity = new InsteonIdentity();
-            Command(InsteonDirectCommands.IDRequest, Byte.MinValue);
+            Command(InsteonDirectCommands.IdRequest, Byte.MinValue);
         }
 
         private void OnDeviceCommandTimeout()
@@ -210,6 +210,9 @@ namespace Insteon.Network.Device
 
                 case InsteonMessageType.SetButtonPressed:
                     OnSetButtonPressed(message);
+                    break;
+                default:
+                    logger.Warn("Unhandled message type");
                     break;
             }
         }
@@ -370,7 +373,7 @@ namespace Insteon.Network.Device
         public bool TryIdentify()
         {
             Identity = new InsteonIdentity();
-            return TryCommand(InsteonDirectCommands.IDRequest, Byte.MinValue);
+            return TryCommand(InsteonDirectCommands.IdRequest, Byte.MinValue);
         }
 
         /// <summary>
