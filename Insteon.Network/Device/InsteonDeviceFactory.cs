@@ -31,8 +31,8 @@ namespace Insteon.Network.Device
                     // Generalized Controllers
                     0x00, new Dictionary<byte, Func<InsteonIdentity, InsteonNetwork, InsteonAddress, InsteonDevice>>()
                     {
-                        {0x11, (identity, network, address)=> new InsteonDevice(network, address, identity)},    // Mini Remote - Switch [2444A3]
-                        {0x12, (identity, network, address)=> new InsteonDevice(network, address, identity)},    // Mini Remote - 8 Scene [2444A2WH8]
+                        {0x11, (identity, network, address)=> new MiniRemote(network, address, identity, 2)},    // Mini Remote - Switch [2444A3]
+                        {0x12, (identity, network, address)=> new MiniRemote(network, address, identity, 8)},    // Mini Remote - 8 Scene [2444A2WH8]
                     }
                 },
                 {
@@ -56,21 +56,21 @@ namespace Insteon.Network.Device
                     // Network Bridges
                     0x03, new Dictionary<byte, Func<InsteonIdentity, InsteonNetwork, InsteonAddress, InsteonDevice>>()
                     {
-                        {0x15, (identity, network, address)=> new InsteonDevice(network, address, identity)},        // PowerLinc USB Modem [2413U]
+                        {0x15, (identity, network, address)=> new PowerLincUsbModem(network, address, identity)},        // PowerLinc USB Modem [2413U]
                     }
                 },
                 {
                     // Sensors and Actuators
                     0x07, new Dictionary<byte, Func<InsteonIdentity, InsteonNetwork, InsteonAddress, InsteonDevice>>()
                     {
-                        {0x00, (identity, network, address)=> new InsteonDevice(network, address, identity)},        // I/O Linc [2450]
+                        {0x00, (identity, network, address)=> new IoLinc(network, address, identity), },        // I/O Linc [2450]
                     }
                 },
                 {
                     // Security, Health, Safety
                     0x10, new Dictionary<byte, Func<InsteonIdentity, InsteonNetwork, InsteonAddress, InsteonDevice>>()
                     {
-                        {0x01, (identity, network, address)=> new InsteonDevice(network, address, identity)},        // Motion Sensor [2842-222]
+                        {0x01, (identity, network, address)=> new MotionSensor(network, address, identity), },        // Motion Sensor [2842-222]
                     }
                 },
                 

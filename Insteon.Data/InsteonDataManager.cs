@@ -35,6 +35,14 @@ namespace Insteon.Data
             }
         }
 
+        public void DeleteAllData()
+        {
+            using (var db = dbFactory.OpenDbConnection())
+            {
+                db.DropTables();
+            }
+        }
+
         public IList<InsteonDeviceModel> GetAllDevices()
         {
             using (var db = dbFactory.OpenDbConnection())

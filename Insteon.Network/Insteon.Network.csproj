@@ -54,6 +54,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Devices\GarageDoor.cs" />
+    <Compile Include="Devices\IoLinc.cs" />
+    <Compile Include="Devices\MiniRemote.cs" />
+    <Compile Include="Devices\MotionSensor.cs" />
+    <Compile Include="Devices\PowerLincUsbModem.cs" />
     <Compile Include="Enum\InsteonModemConfigurationFlags.cs" />
     <Compile Include="Commands\InsteonModemSerialCommand.cs" />
     <Compile Include="Devices\SwitchedLighting.cs" />

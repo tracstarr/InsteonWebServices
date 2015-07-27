@@ -2,9 +2,9 @@
 
 namespace Insteon.Network.Devices
 {
-    public class GarageDoor : IoLinc
+    public class IoLinc : InsteonDevice
     {
-        internal GarageDoor(InsteonNetwork network, InsteonAddress address, InsteonIdentity identity)
+        internal IoLinc(InsteonNetwork network, InsteonAddress address, InsteonIdentity identity)
             : base(network, address, identity)
         {
         }
