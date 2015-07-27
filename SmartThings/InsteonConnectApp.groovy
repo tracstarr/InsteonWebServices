@@ -130,11 +130,15 @@ def deviceSelectPage(){
         
         def dimmerOptions = dimmersDiscovered() ?: []
         def numDimmersFound = dimmerOptions.size() ?: 0
+        
+        def motionOptions = motionDiscovered() ?: []
+        def numMotionFound = motionOptions.size() ?: 0
      
      	return dynamicPage(name:"deviceSelectPage", title:"Device Selection", nextPage:"") {
 			section("Select your device below.") {
         		input "selectedSwitches", "enum", required:false, title:"Select Switches (${numSwitchesFound} found)", multiple:true, options:switchOptions	
                 input "selectedDimmers", "enum", required:false, title:"Select Dimmers (${numDimmersFound} found)", multiple:true, options:dimmerOptions	
+                input "selectedMotion", "enum", required:false, title:"Select Motion (${numMotionFound} found)", multiple:true, options:motionOptions	
 			}		
 		}   
     }
@@ -185,6 +189,7 @@ def resetDeviceListPage (){
     state.waitOnRestCall = false
     state.switches = null
     state.dimmers = null
+    state.motion = null
     
     return dynamicPage(name:"resetDeviceListPage", title:"Reset Devices") {
 			section() {
@@ -361,6 +366,10 @@ def lanHandler(evt) {
                         else if (it?.category?.equalsIgnoreCase("Switched Lighting Control"))
                         {       
                             d = getSwitches()                		
+                        }
+                        else if (it?.subCategory?.equalsIgnoreCase("Motion Sensor [2420M]"))
+                        {                        	
+                            d = getMotion()
                         }
                         else if (it?.category?.equalsIgnoreCase("Sensors and Actuators"))
                         {
@@ -605,6 +614,7 @@ def deleteChildren(selected, existing){
 def DeleteChildDevicesNotSelected() {
 	deleteChildren(selectedSwitches, getSwitches())  
     deleteChildren(selectedDimmers, getDimmers()) 
+    deleteChildren(selectedMotion, getMotion())
 }
 
 def UpdateSelectedDevices() {
@@ -612,6 +622,7 @@ def UpdateSelectedDevices() {
     	
     createNewDevices(selectedSwitches, getSwitches(), "Insteon Switch")   
     createNewDevices(selectedDimmers, getDimmers(), "Insteon Dimmable Switch")   
+    createNewDevices(selectedMotion, getMotion(), "Insteon Motion Sensor")
 }
 
 private def createNewDevices(selected, existing, deviceType) {
@@ -689,6 +700,23 @@ def getDimmers() {
 	state.dimmers = state.dimmers ?: [:]
 }
 
+
+Map motionDiscovered() {
+	def devices =  getMotion()
+	def map = [:]
+	
+    devices.each {
+        def value = "${it?.value?.name}"
+        def key = app.id + "/" + it?.value?.id 
+        map["${key}"] = value
+    }
+
+	map
+}
+
+def getMotion() {
+	state.motion = state.motion ?: [:]
+}
 /************************************************************
 *	Insteon Functions
 */

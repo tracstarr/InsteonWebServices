@@ -63,14 +63,14 @@ namespace Insteon.Network.Device
                     // Sensors and Actuators
                     0x07, new Dictionary<byte, Func<InsteonIdentity, InsteonNetwork, InsteonAddress, InsteonDevice>>()
                     {
-                        {0x00, (identity, network, address)=> new IoLinc(network, address, identity), },        // I/O Linc [2450]
+                        {0x00, (identity, network, address)=> new IoLinc(network, address, identity) },        // I/O Linc [2450]
                     }
                 },
                 {
                     // Security, Health, Safety
                     0x10, new Dictionary<byte, Func<InsteonIdentity, InsteonNetwork, InsteonAddress, InsteonDevice>>()
                     {
-                        {0x01, (identity, network, address)=> new MotionSensor(network, address, identity), },        // Motion Sensor [2842-222]
+                        {0x01, (identity, network, address)=> new MotionSensor(network, address, identity) },        // Motion Sensor [2842-222]
                     }
                 },
                 

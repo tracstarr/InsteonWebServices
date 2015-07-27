@@ -129,8 +129,11 @@ namespace Insteon.Network.Message
                         // TODO: probably shouldn't be in a while loop. Need a better way to address this
                         while (!network.Controller.TryGetLinkIdentity(new InsteonAddress(address), out id))
                         {
-                            InsteonDevice device = network.Devices.Add(new InsteonAddress(address), id.Value);
-                            device.OnMessage(message);
+                            if (id != null)
+                            {
+                                InsteonDevice device = network.Devices.Add(new InsteonAddress(address), id.Value);
+                                device.OnMessage(message);
+                            }
                         }
                     }
                 }
