@@ -44,7 +44,7 @@ namespace Insteon.Daemon.Common
             this.GlobalResponseFilters.Add((req, res, dto) =>
             {
 
-                res.AddHeader("X-SmartThings", ServiceName);
+                res.AddHeader("X-Insteon", ServiceName);
 
             });
 
