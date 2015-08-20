@@ -157,16 +157,9 @@ namespace Insteon.Network
             string name = (Name != Value) ? Name : string.Empty;
             if (string.IsNullOrEmpty(name) && Address.IsEmpty)
             {
-                return string.Format("{0}: {1}", Type, Value);
+                return $"{Type}: {Value}";
             }
-            else if (Address.IsEmpty)
-            {
-                return string.Format("{0}: {1}, {2}", Type, Value, name);
-            }
-            else
-            {
-                return string.Format("{0}: {1}, {2}, {3}", Type, Value, name, Address.ToString());
-            }
+            return Address.IsEmpty ? $"{Type}: {Value}, {name}" : $"{Type}: {Value}, {name}, {Address.ToString()}";
         }
     }
 }

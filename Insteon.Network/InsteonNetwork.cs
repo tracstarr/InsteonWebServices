@@ -53,10 +53,7 @@ namespace Insteon.Network
         ///<summary>
         /// Determines whether the connection to the INSTEON network is active.
         /// </summary>
-        public bool IsConnected
-        {
-            get { return Connection != null && Controller != null && !Controller.Address.IsEmpty; }
-        }
+        public bool IsConnected => Connection != null && Controller != null && !Controller.Address.IsEmpty;
 
         /// <summary>
         /// Provides the last connect status result.
@@ -167,7 +164,8 @@ namespace Insteon.Network
                 list.AddRange(SmartLincFinder.GetRegisteredSmartLincs());
                 foreach (SmartLincInfo item in list)
                 {
-                    OnConnectProgress(40 * list.IndexOf(item) / list.Count + 10, string.Format("Accessing SmartLinc {0} of {1} at {2}", list.IndexOf(item) + 1, list.Count, item.Uri.Host)); // 10% to 50% progress
+                    OnConnectProgress(40 * list.IndexOf(item) / list.Count + 10,
+                        $"Accessing SmartLinc {list.IndexOf(item) + 1} of {list.Count} at {item.Uri.Host}"); // 10% to 50% progress
                     if (LastConnectStatus.Cancel)
                     {
                         connections = null;
@@ -215,35 +213,23 @@ namespace Insteon.Network
                 Connection.Address = Controller.Address;
             }
 
-            if (Connected != null)
-            {
-                Connected(this, EventArgs.Empty);
-            }
+            Connected?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnConnectProgress(int progressPercentage, string status)
         {
             LastConnectStatus = new ConnectProgressChangedEventArgs(progressPercentage, status);
-            if (ConnectProgress != null)
-            {
-                ConnectProgress(this, LastConnectStatus);
-            }
+            ConnectProgress?.Invoke(this, LastConnectStatus);
         }
 
         internal void OnDisconnected()
         {
-            if (Disconnected != null)
-            {
-                Disconnected(this, EventArgs.Empty);
-            }
+            Disconnected?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnClosing()
         {
-            if (Closing != null)
-            {
-                Closing(this, EventArgs.Empty);
-            }
+            Closing?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>

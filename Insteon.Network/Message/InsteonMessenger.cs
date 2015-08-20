@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Insteon.Network.Commands;
 using Insteon.Network.Device;
@@ -33,7 +34,7 @@ namespace Insteon.Network.Message
         {
             if (network == null)
             {
-                throw new ArgumentNullException("network");
+                throw new ArgumentNullException(nameof(network));
             }
 
             this.network = network;
@@ -43,10 +44,7 @@ namespace Insteon.Network.Message
 
         public Dictionary<PropertyKey, int> ControllerProperties { get; private set; }
 
-        public bool IsConnected
-        {
-            get { return bridge.IsConnected; }
-        }
+        public bool IsConnected => bridge.IsConnected;
 
         public void Close()
         {
@@ -85,12 +83,9 @@ namespace Insteon.Network.Message
             lock (duplicates)
             {
                 // determine if message key matches an entry in the list
-                foreach (var item in duplicates)
+                if (duplicates.Any(item => message.Key == item.Key))
                 {
-                    if (message.Key == item.Key)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
 
                 // create a new duplicte entry
@@ -153,7 +148,7 @@ namespace Insteon.Network.Message
         {
             if (TrySend(message, true) != EchoStatus.ACK)
             {
-                throw new IOException(string.Format("Failed to send message '{0}'", Utilities.ByteArrayToString(message)));
+                throw new IOException($"Failed to send message '{Utilities.ByteArrayToString(message)}'");
             }
         }
 
@@ -161,7 +156,7 @@ namespace Insteon.Network.Message
         {
             if (TrySendReceive(message, true, receiveMessageId, null, out properties) != EchoStatus.ACK)
             {
-                throw new IOException(string.Format("Failed to send message '{0}'.", Utilities.ByteArrayToString(message)));
+                throw new IOException($"Failed to send message '{Utilities.ByteArrayToString(message)}'.");
             }
         }
 
@@ -248,7 +243,7 @@ namespace Insteon.Network.Message
             EchoStatus status = TrySend(message, retryOnNak, echoLength);
             echoCommand = false;
 
-            properties = echoMessage != null ? echoMessage.Properties : null;
+            properties = echoMessage?.Properties;
             echoMessage = null;
             return status;
         }

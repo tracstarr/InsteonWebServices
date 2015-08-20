@@ -20,10 +20,7 @@ namespace Insteon.Network.Device
         /// <summary>
         /// Returns the number of devices in the known INSTEON device collection.
         /// </summary>
-        public int Count
-        {
-            get { return devices.Count; }
-        }
+        public int Count => devices.Count;
 
         /// <summary>
         /// Returns an enumerator that iterates through the collection.
@@ -127,34 +124,22 @@ namespace Insteon.Network.Device
 
         internal void OnDeviceAdded(InsteonDevice device)
         {
-            if (DeviceAdded != null)
-            {
-                DeviceAdded(this, new InsteonDeviceEventArgs(device));
-            }
+            DeviceAdded?.Invoke(this, new InsteonDeviceEventArgs(device));
         }
 
         internal void OnDeviceCommandTimeout(InsteonDevice device)
         {
-            if (DeviceCommandTimeout != null)
-            {
-                DeviceCommandTimeout(this, new InsteonDeviceEventArgs(device));
-            }
+            DeviceCommandTimeout?.Invoke(this, new InsteonDeviceEventArgs(device));
         }
 
         internal void OnDeviceIdentified(InsteonDevice device)
         {
-            if (DeviceIdentified != null)
-            {
-                DeviceIdentified(this, new InsteonDeviceEventArgs(device));
-            }
+            DeviceIdentified?.Invoke(this, new InsteonDeviceEventArgs(device));
         }
 
         internal void OnDeviceStatusChanged(InsteonDevice device, InsteonDeviceStatus status)
         {
-            if (DeviceStatusChanged != null)
-            {
-                DeviceStatusChanged(this, new InsteonDeviceStatusChangedEventArgs(device, status));
-            }
+            DeviceStatusChanged?.Invoke(this, new InsteonDeviceStatusChangedEventArgs(device, status));
         }
     }
 }

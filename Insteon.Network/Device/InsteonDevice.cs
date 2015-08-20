@@ -33,13 +33,7 @@ namespace Insteon.Network.Device
             ackTimer = new Timer(PendingCommandTimerCallback, null, Timeout.Infinite, Constants.deviceAckTimeout);
         }
         
-        public string DeviceName
-        {
-            get
-            {
-                return string.Format("{0} [{1}]", Identity.GetSubCategoryName(), Address);
-            }
-        }
+        public string DeviceName => $"{Identity.GetSubCategoryName()} [{Address}]";
 
         /// <summary>
         /// The INSTEON address of the device.
@@ -81,7 +75,7 @@ namespace Insteon.Network.Device
         {
             if (!TryCommand(command, value))
             {
-                throw new IOException(string.Format("Failed to send command '{0}' for device '{1}'", command, Address));
+                throw new IOException($"Failed to send command '{command}' for device '{Address}'");
             }
         }
         
@@ -125,33 +119,24 @@ namespace Insteon.Network.Device
         public void Identify()
         {
             Identity = new InsteonIdentity();
-            Command(InsteonDirectCommands.IdRequest, Byte.MinValue);
+            Command(InsteonDirectCommands.IdRequest, byte.MinValue);
         }
 
         private void OnDeviceCommandTimeout()
         {
-            if (DeviceCommandTimeout != null)
-            {
-                DeviceCommandTimeout(this, new InsteonDeviceEventArgs(this));
-            }
+            DeviceCommandTimeout?.Invoke(this, new InsteonDeviceEventArgs(this));
             network.Devices.OnDeviceCommandTimeout(this);
         }
 
         private void OnDeviceIdentified()
         {
-            if (DeviceIdentified != null)
-            {
-                DeviceIdentified(this, new InsteonDeviceEventArgs(this));
-            }
+            DeviceIdentified?.Invoke(this, new InsteonDeviceEventArgs(this));
             network.Devices.OnDeviceIdentified(this);
         }
 
         protected void OnDeviceStatusChanged(InsteonDeviceStatus status)
         {
-            if (DeviceStatusChanged != null)
-            {
-                DeviceStatusChanged(this, new InsteonDeviceStatusChangedEventArgs(this, status));
-            }
+            DeviceStatusChanged?.Invoke(this, new InsteonDeviceStatusChangedEventArgs(this, status));
             network.Devices.OnDeviceStatusChanged(this, status);
         }
 
@@ -256,7 +241,7 @@ namespace Insteon.Network.Device
         {
             ackTimer.Change(Timeout.Infinite, Timeout.Infinite); // stop ACK timeout timer
 
-            var retry = false;
+            bool retry;
             var command = InsteonDirectCommands.On;
             byte value = 0;
             var retryCount = 0;

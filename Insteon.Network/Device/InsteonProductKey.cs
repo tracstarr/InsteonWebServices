@@ -6,67 +6,24 @@ namespace Insteon.Network.Device
     public sealed class InsteonProductKey : IComparable<InsteonProductKey>, IEquatable<InsteonProductKey>
     {
         private readonly int productKey;
-        private static InsteonProductKey invalidProductKey;
 
-        public string ProductKey
-        {
-            get
-            {
-                return StringKey();
-            }
-        }
+        public string ProductKey => StringKey();
 
-        public byte KeyHigh
-        {
-            get
-            {
-                return (byte)(productKey >> 16);
-            }
-        }
+        public byte KeyHigh => (byte)(productKey >> 16);
 
-        public byte KeyMid
-        {
-            get
-            {
-                return (byte)(productKey >> 8);
-            }
-        }
+        public byte KeyMid => (byte)(productKey >> 8);
 
-        public byte KeyLow
-        {
-            get
-            {
-                return (byte)productKey;
-            }
-        }
+        public byte KeyLow => (byte)productKey;
 
-        public byte[] KeyBytes
-        {
-            get
-            {
-                return GetKeyBytes();
-            }
-        }
+        public byte[] KeyBytes => GetKeyBytes();
 
-        public bool IsValid
-        {
-            get
-            {
-                return Validate();
-            }
-        }
+        public bool IsValid => Validate();
 
-        public static InsteonProductKey InvalidProductKey
-        {
-            get
-            {
-                return invalidProductKey;
-            }
-        }
+        public static InsteonProductKey InvalidProductKey { get; }
 
         static InsteonProductKey()
         {
-            invalidProductKey = new InsteonProductKey(0, 0, 0);
+            InvalidProductKey = new InsteonProductKey(0, 0, 0);
         }
 
         public InsteonProductKey(byte keyHigh, byte keyMid, byte keyLow)
@@ -169,7 +126,8 @@ namespace Insteon.Network.Device
             }
             catch (Exception ex)
             {
-                throw new ArgumentException(string.Format("Provided product key '{0}' is not in the right format.  INSTEON product keys shouldcontain 3 hexadecimal values with or without seperator.  XX.XX.XX or XXXXXX format.", productKey), "productKey", ex);
+                throw new ArgumentException(
+                    $"Provided product key '{productKey}' is not in the right format.  INSTEON product keys shouldcontain 3 hexadecimal values with or without seperator.  XX.XX.XX or XXXXXX format.", "productKey", ex);
             }
         }
 
@@ -181,9 +139,8 @@ namespace Insteon.Network.Device
         public static InsteonProductKey FromBytes(byte[] key, int startIndex)
         {
             if (key.Length < 3 + startIndex)
-                throw new ArgumentException("At least 3 bytes requred for product key.", "key");
-            else
-                return new InsteonProductKey(key[startIndex], key[1 + startIndex], key[2 + startIndex]);
+                throw new ArgumentException("At least 3 bytes requred for product key.", nameof(key));
+            return new InsteonProductKey(key[startIndex], key[1 + startIndex], key[2 + startIndex]);
         }
     }
 }

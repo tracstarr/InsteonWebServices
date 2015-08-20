@@ -42,10 +42,7 @@
         /// <summary>
         /// Gets a value indicating whether this InsteonIdentity is empty.
         /// </summary>
-        public bool IsEmpty
-        {
-            get { return DevCat == 0 && SubCat == 0 && FirmwareVersion == 0; }
-        }
+        public bool IsEmpty => DevCat == 0 && SubCat == 0 && FirmwareVersion == 0;
 
         /// <summary>
         /// The device sub-category representing various types of products within a product family.

@@ -33,10 +33,7 @@ namespace Insteon.Network.Serial
 
         public void Open()
         {
-            if (port != null)
-            {
-                port.Close();
-            }
+            port?.Close();
             port.Open();
             port.DataReceived += port_DataReceived;
         }
@@ -72,7 +69,7 @@ namespace Insteon.Network.Serial
             }
             if (data == null)
             {
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             }
             port.Write(data, 0, data.Length);
         }
@@ -85,10 +82,7 @@ namespace Insteon.Network.Serial
 
         private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (notify != null)
-            {
-                notify();
-            }
+            notify?.Invoke();
             wait.Set();
         }
     }

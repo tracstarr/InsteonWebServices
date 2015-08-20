@@ -130,10 +130,7 @@ namespace Insteon.Network.Serial
                             receiveBuffer.AddRange(data);
                             //logger.DebugFormat("NetDriver received data: {0}", Utilities.ByteArrayToString(data));
                         }
-                        if (notify != null)
-                        {
-                            notify();
-                        }
+                        notify?.Invoke();
                         wait.Set();
                     }
                 }

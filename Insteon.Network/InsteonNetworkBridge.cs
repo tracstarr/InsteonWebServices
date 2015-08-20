@@ -30,15 +30,12 @@ namespace Insteon.Network
         {
             if (messageProcessor == null)
             {
-                throw new ArgumentNullException("messageProcessor");
+                throw new ArgumentNullException(nameof(messageProcessor));
             }
             this.messageProcessor = messageProcessor;
         }
 
-        public bool IsConnected
-        {
-            get { return port != null; }
-        }
+        public bool IsConnected => port != null;
 
         void IDisposable.Dispose()
         {
@@ -57,10 +54,7 @@ namespace Insteon.Network
 
         public Dictionary<PropertyKey, int> Connect(InsteonConnection connection)
         {
-            if (port != null)
-            {
-                port.Close();
-            }
+            port?.Close();
 
             port = SerialPortCreator.Create(connection);
             port.Open();

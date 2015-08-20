@@ -163,26 +163,17 @@ namespace Insteon.Network
 
         private void OnDeviceLinked(InsteonDevice device)
         {
-            if (DeviceLinked != null)
-            {
-                DeviceLinked(this, new InsteonDeviceEventArgs(device));
-            }
+            DeviceLinked?.Invoke(this, new InsteonDeviceEventArgs(device));
         }
 
         private void OnDeviceLinkTimeout()
         {
-            if (DeviceLinkTimeout != null)
-            {
-                DeviceLinkTimeout(this, EventArgs.Empty);
-            }
+            DeviceLinkTimeout?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnDeviceUnlinked(InsteonDevice device)
         {
-            if (DeviceUnlinked != null)
-            {
-                DeviceUnlinked(this, new InsteonDeviceEventArgs(device));
-            }
+            DeviceUnlinked?.Invoke(this, new InsteonDeviceEventArgs(device));
         }
 
 
