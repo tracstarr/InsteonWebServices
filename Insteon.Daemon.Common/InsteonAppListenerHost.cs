@@ -41,7 +41,7 @@ namespace Insteon.Daemon.Common
                 cb.PushDeviceStatusUpdate(data.Device, data.DeviceStatus);
             };
 
-            this.GlobalResponseFilters.Add((req, res, dto) =>
+            GlobalResponseFilters.Add((req, res, dto) =>
             {
 
                 res.AddHeader("X-Insteon", ServiceName);

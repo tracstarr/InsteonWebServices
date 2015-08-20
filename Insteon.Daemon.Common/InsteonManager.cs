@@ -59,9 +59,7 @@ namespace Insteon.Daemon.Common
                 found.Category = data.Device.Identity.DevCat;
                 found.SubCategory = data.Device.Identity.SubCat;
                 found.Firmware = data.Device.Identity.FirmwareVersion;
-                found.ProductKey = data.Device.Identity.ProductKey == null
-                    ? null
-                    : data.Device.Identity.ProductKey.StringKey();
+                found.ProductKey = data.Device.Identity.ProductKey?.StringKey();
                 dataManager.Update(found);
             }
             else
@@ -73,7 +71,7 @@ namespace Insteon.Daemon.Common
                     Category = data.Device.Identity.DevCat,
                     SubCategory = data.Device.Identity.SubCat,
                     Firmware = data.Device.Identity.FirmwareVersion,
-                    ProductKey = data.Device.Identity.ProductKey == null ? null : data.Device.Identity.ProductKey.StringKey()
+                    ProductKey = data.Device.Identity.ProductKey?.StringKey()
                 });
             }
         }
@@ -144,11 +142,11 @@ namespace Insteon.Daemon.Common
                             Category = id.Value.DevCat,
                             SubCategory = id.Value.SubCat,
                             Firmware = id.Value.FirmwareVersion,
-                            ProductKey = id.Value.ProductKey != null ? id.Value.ProductKey.ToString() : null,
+                            ProductKey = id.Value.ProductKey?.ToString(),
 
                         });
 
-                        logger.Debug(string.Format("New device identified and added to device list. ({0})", d));
+                        logger.DebugFormat("New device identified and added to device list. ({0})", d);
                     }
                     else
                     {

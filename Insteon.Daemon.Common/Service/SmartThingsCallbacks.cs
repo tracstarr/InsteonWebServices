@@ -7,7 +7,7 @@ namespace Insteon.Daemon.Common.Service
 {
     internal class SmartThingsCallbacks
     {
-        const string smartthingsUrl = "https://graph.api.smartthings.com";
+        const string SmartthingsUrl = "https://graph.api.smartthings.com";
 
         private readonly SmartThingsSettings settings;
         private readonly RestClient client;
@@ -17,14 +17,14 @@ namespace Insteon.Daemon.Common.Service
         public SmartThingsCallbacks(SmartThingsSettings settings)
         {
             this.settings = settings;
-            client = new RestClient(smartthingsUrl);
+            client = new RestClient(SmartthingsUrl);
 
             rootPath = string.Format("/api/smartapps/installations/{0}/", settings.ApplicationId);
         }
 
         public bool Authorization()
         {
-            string path = string.Format("{0}link", rootPath);
+            string path = $"{rootPath}link";
             var request = new RestRequest(path, Method.GET) { RequestFormat = DataFormat.Json };
             request.AddQueryParameter("access_token", settings.AccessToken);
 
@@ -34,7 +34,7 @@ namespace Insteon.Daemon.Common.Service
 
         public bool AuthorizationRevoke()
         {
-            string path = string.Format("{0}revoke", rootPath);
+            string path = $"{rootPath}revoke";
             var request = new RestRequest(path, Method.GET) { RequestFormat = DataFormat.Json };
             request.AddQueryParameter("access_token", settings.AccessToken);
 
@@ -48,7 +48,7 @@ namespace Insteon.Daemon.Common.Service
             //make a call to GetOnLevel for dimmable devices as no response will be handled. We must "ask" ST to make another rest call to obtain current state. All we can 
             //do here is tell it there is an update.
 
-            string path = string.Format("{0}deviceupdate/{1}/{2}", rootPath, device.Address, status);
+            string path = $"{rootPath}deviceupdate/{device.Address}/{status}";
             var request = new RestRequest(path, Method.PUT) { RequestFormat = DataFormat.Json };
 
             request.AddQueryParameter("access_token", settings.AccessToken);

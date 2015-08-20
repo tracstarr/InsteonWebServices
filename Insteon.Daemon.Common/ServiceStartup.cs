@@ -9,13 +9,7 @@ namespace Insteon.Daemon.Common
     {
         static InsteonAppListenerHost appHost;
 
-        public static string ListeningOn
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["listenOn"];
-            }
-        }
+        public static string ListeningOn => ConfigurationManager.AppSettings["listenOn"];
 
         public static void Main()
         {
@@ -41,11 +35,7 @@ namespace Insteon.Daemon.Common
 
         public static void Stop()
         {
-            if (appHost != null)
-            {
-                appHost.Stop();
-            }
-
+            appHost?.Stop();
         }
 
         public static AppHostHttpListenerBase GetAppHostListner()
