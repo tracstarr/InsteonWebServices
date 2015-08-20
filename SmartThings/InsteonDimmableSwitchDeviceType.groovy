@@ -57,7 +57,16 @@ metadata {
 // on level when we receive the push notification that the device changed
 def update(String status)
 {	
-  	sendEvent (name: "switch", value: "${status}")
+  	def eventMap = [
+       'Off':"off",
+       'FastOff':"off",
+       'On':"on",
+       'FastOn':"on",
+      ]
+
+  	def newState = eventMap."${status}"
+  	sendEvent (name: "switch", value: "${newState}")
+  	
     refresh()
 }
 

@@ -193,7 +193,8 @@ namespace Insteon.Network.Helpers
                     { 
                         {0x00, "First Alert ONELink RF to Insteon Bridge"},
                         {0x01, "Motion Sensor [2420M]"},
-                        {0x02, "TriggerLinc - INSTEON Open / Close Sensor [2421]"}
+                        {0x02, "TriggerLinc - INSTEON Open / Close Sensor [2421]"},
+                        {0x08, "Leak Sensor [2852-222]"}
                     } }
             };
 

@@ -71,6 +71,7 @@ namespace Insteon.Network.Device
                     0x10, new Dictionary<byte, Func<InsteonIdentity, InsteonNetwork, InsteonAddress, InsteonDevice>>()
                     {
                         {0x01, (identity, network, address)=> new MotionSensor(network, address, identity) },        // Motion Sensor [2842-222]
+                        {0x08, (identity, network, address)=> new LeakSensor(network, address, identity)  },        // Leak Sensor
                     }
                 },
                 

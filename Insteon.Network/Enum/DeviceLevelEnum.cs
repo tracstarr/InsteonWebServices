@@ -4,6 +4,6 @@
     {
         Off = 0x00,
 
-        FullOn = 0xFF
+        On = 0xFF
     }
 }

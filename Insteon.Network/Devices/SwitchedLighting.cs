@@ -12,16 +12,16 @@ namespace Insteon.Network.Devices
         /// Commands the lighting device to turn on immediately
         /// </summary>
         /// <returns>True if the device responds with an ACK</returns>
-        public bool TurnOn()
+        public override bool TurnOn()
         {
-            return TryCommand(InsteonDirectCommands.FastOn, (byte) DeviceLevelEnum.FullOn); 
+            return TryCommand(InsteonDirectCommands.FastOn, (byte) DeviceLevelEnum.On); 
         }
 
         /// <summary>
         /// Commands the lighting device to turn off immediately
         /// </summary>
         /// <returns>True if the device responds with an ACK</returns>
-        public bool TurnOff()
+        public override bool TurnOff()
         {
             return TryCommand(InsteonDirectCommands.FastOff, (byte) DeviceLevelEnum.Off);
         }

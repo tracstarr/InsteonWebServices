@@ -90,8 +90,11 @@
     <Compile Include="InsteonAppListenerHost.cs" />
     <Compile Include="InsteonManager.cs" />
     <Compile Include="ServiceStartup.cs" />
+    <Compile Include="Service\DeviceService.cs" />
+    <Compile Include="Service\DeviceServiceBase.cs" />
     <Compile Include="Service\InsteonService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\IoLincService.cs" />
     <Compile Include="Service\LightingService.cs" />
     <Compile Include="Service\SmartThingsCallbacks.cs" />
     <Compile Include="Settings\SmartThingsSettings.cs" />

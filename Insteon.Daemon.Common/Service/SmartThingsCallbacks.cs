@@ -55,7 +55,7 @@ namespace Insteon.Daemon.Common.Service
 
             var response = client.Execute(request);
 
-            logger.Info(response.Content);
+            logger.InfoFormat("Content Returend from ST: {0}", response.Content);
             return response.Content.Contains("ok");
         }
     }

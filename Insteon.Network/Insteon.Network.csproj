@@ -53,8 +53,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Devices\GarageDoor.cs" />
     <Compile Include="Devices\IoLinc.cs" />
+    <Compile Include="Devices\LeakSensor.cs" />
     <Compile Include="Devices\MiniRemote.cs" />
     <Compile Include="Devices\MotionSensor.cs" />
     <Compile Include="Devices\PowerLincUsbModem.cs" />
@@ -65,6 +65,7 @@
     <Compile Include="Enum\InsteonDeviceLinkRecordType.cs" />
     <Compile Include="Enum\DeviceLevelEnum.cs" />
     <Compile Include="Enum\DimmerDirection.cs" />
+    <Compile Include="Enum\IOState.cs" />
     <Compile Include="Enum\MessageFlagsStandard.cs" />
     <Compile Include="Enum\MessageTypeFlags.cs" />
     <Compile Include="Message\IMessageProcessor.cs" />

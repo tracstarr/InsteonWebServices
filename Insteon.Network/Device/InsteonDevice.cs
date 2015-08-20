@@ -97,7 +97,7 @@ namespace Insteon.Network.Device
         public byte GetOnLevel()
         {
             byte value;
-            if (!TryGetOnLevel(out value))
+            if (!TryGetStatus(out value))
             {
                 throw new IOException();
             }
@@ -146,7 +146,7 @@ namespace Insteon.Network.Device
             network.Devices.OnDeviceIdentified(this);
         }
 
-        private void OnDeviceStatusChanged(InsteonDeviceStatus status)
+        protected void OnDeviceStatusChanged(InsteonDeviceStatus status)
         {
             if (DeviceStatusChanged != null)
             {
@@ -332,7 +332,7 @@ namespace Insteon.Network.Device
         }
 
         /// <summary>
-        /// Gets a value that indicates the on-level of the device.
+        /// Gets a value that indicates the on-level of the device. (Status)
         /// </summary>
         /// <returns>
         /// A value indicating the on-level of the device. For a dimmer a value between 0 and 255 will be returned. For a non-dimmer a value 0 or 255 will be returned.
@@ -340,12 +340,12 @@ namespace Insteon.Network.Device
         /// <remarks>
         /// This is a blocking method that sends an INSTEON message to the target device and waits for a reply, or until the device command times out.
         /// </remarks>
-        public bool TryGetOnLevel(out byte value)
+        public bool TryGetStatus(out byte value, byte commandValue = 0x0)
         {
-            var command = InsteonDirectCommands.StatusRequest;
-            WaitAndSetPendingCommand(command, 0);
+            const InsteonDirectCommands command = InsteonDirectCommands.StatusRequest;
+            WaitAndSetPendingCommand(command, commandValue);
             logger.DebugFormat("Device {0} GetOnLevel", Address.ToString());
-            var message = GetStandardMessage(Address, (byte)command, 0);
+            var message = GetStandardMessage(Address, (byte)command, commandValue);
             Dictionary<PropertyKey, int> properties;
             var status = network.Messenger.TrySendReceive(message, true, (byte) InsteonModemSerialCommand.StandardMessage, null, out properties); // on-level returned in cmd2 of ACK
             if (status == EchoStatus.ACK && properties != null)
@@ -440,6 +440,24 @@ namespace Insteon.Network.Device
         {
             network.Controller.EnterLinkMode(InsteonLinkMode.Delete, group);
             Command(InsteonDirectCommands.EnterUnlinkingMode, group);
+        }
+        
+        /// <summary>
+        /// Commands the device to turn on
+        /// </summary>
+        /// <returns>True if the device responds with an ACK</returns>
+        public virtual bool TurnOn()
+        {
+            return TryCommand(InsteonDirectCommands.On, (byte)DeviceLevelEnum.On);
+        }
+
+        /// <summary>
+        /// Commands the device to turn off
+        /// </summary>
+        /// <returns>True if the device responds with an ACK</returns>
+        public virtual bool TurnOff()
+        {
+            return TryCommand(InsteonDirectCommands.Off, (byte)DeviceLevelEnum.Off);
         }
 
         public override string ToString()
