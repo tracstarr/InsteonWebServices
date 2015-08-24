@@ -2,6 +2,7 @@
 using System.Configuration;
 using ServiceStack;
 using ServiceStack.Logging;
+using ServiceStack.Logging.NLogger;
 
 namespace Insteon.Daemon.Common
 {
@@ -13,7 +14,11 @@ namespace Insteon.Daemon.Common
 
         public static void Main()
         {
+#if DEBUG
             LogManager.LogFactory = new ConsoleLogFactory();
+#else
+            LogManager.LogFactory = new NLogFactory();
+#endif
             var logger = LogManager.GetLogger(typeof(ServiceStartup));
 
             try
@@ -40,7 +45,7 @@ namespace Insteon.Daemon.Common
 
         public static AppHostHttpListenerBase GetAppHostListner()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
+            LogManager.LogFactory = new NLogFactory();
             var insteonConnection = ConfigurationManager.AppSettings["insteonConnection"];
             return new InsteonAppListenerHost(insteonConnection);
         }
